@@ -18,9 +18,7 @@ export const AppProviders = ({ children }) => {
             <ReduxProvider store={store}>
                 <QueryClientProvider client={queryClient}>
                     <ThemeProvider theme={theme}>
-                        {/* Bridge for styled-components to access MUI theme tokens if needed, 
-                though usually we use MUI's styled() or sx prop. 
-                Passing 'theme' to styled-components provider for compatibility. */}
+                        {/* Bridge for styled-components to access MUI theme tokens if needed */}
                         <StyledThemeProvider theme={theme}>
                             <CssBaseline />
                             <GlobalStyles />
