@@ -1,0 +1,76 @@
+[
+  {
+    "id": "p-101",
+    "firstName": "Ahmed",
+    "lastName": "Al-Mansour",
+    "dob": "1985-04-12",
+    "gender": "male",
+    "phone": "0501234567",
+    "email": "ahmed.m@example.com",
+    "address": "Riyadh, Olaya St.",
+    "createdAt": "2025-01-10T09:00:00Z",
+    "lastVisit": "2025-01-20T10:30:00Z",
+    "complaints": [
+      {
+        "id": "c-1",
+        "chiefComplaint": "Severe Headache",
+        "duration": "3 days",
+        "severity": "High",
+        "notes": "Pain localized in frontal region.",
+        "symptoms": [
+          { "name": "Nausea", "severity": "Medium", "duration": "1 day" },
+          { "name": "Sensitivity to light", "severity": "High", "duration": "3 days" }
+        ],
+        "vitals": {
+          "bp": "130/85",
+          "hr": "88",
+          "temp": "37.2"
+        },
+        "visitDate": "2025-01-20T10:30:00Z"
+      }
+    ]
+  },
+  {
+    "id": "p-102",
+    "firstName": "Sara",
+    "lastName": "Ibrahim",
+    "dob": "1992-08-25",
+    "gender": "female",
+    "phone": "0559876543",
+    "email": "sara.i@example.com",
+    "address": "Jeddah, Cornish Rd.",
+    "createdAt": "2025-01-15T14:20:00Z",
+    "lastVisit": "2025-01-15T14:20:00Z",
+    "complaints": [
+      {
+        "id": "c-2",
+        "chiefComplaint": "Back Pain",
+        "duration": "2 weeks",
+        "severity": "Medium",
+        "notes": "Lower back pain worsening with sitting.",
+        "symptoms": [
+          { "name": "Stiffness", "severity": "Medium", "duration": "Morning" }
+        ],
+        "vitals": {
+          "bp": "120/80",
+          "hr": "72",
+          "temp": "36.8"
+        },
+        "visitDate": "2025-01-15T14:20:00Z"
+      }
+    ]
+  },
+  {
+    "id": "p-103",
+    "firstName": "Fatima",
+    "lastName": "Ali",
+    "dob": "1978-11-30",
+    "gender": "female",
+    "phone": "0541112233",
+    "email": "fatima.ali@example.com",
+    "address": "Dammam, King Fahd Rd.",
+    "createdAt": "2025-01-05T11:00:00Z",
+    "lastVisit": null,
+    "complaints": []
+  }
+]

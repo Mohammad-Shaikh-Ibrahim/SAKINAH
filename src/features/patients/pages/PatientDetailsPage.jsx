@@ -1,0 +1,217 @@
+import React, { useState } from 'react';
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
+import {
+    Box,
+    Typography,
+    Paper,
+    Button,
+    Grid,
+    Chip,
+    Divider,
+    Tabs,
+    Tab,
+    Card,
+    CardContent,
+    IconButton,
+    CircularProgress,
+    Alert,
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { usePatient, useDeletePatient } from '../api/usePatients';
+import { Helmet } from 'react-helmet-async';
+import { format } from 'date-fns';
+
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    {children}
+                </Box>
+            )}
+        </div>
+    );
+}
+
+export const PatientDetailsPage = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [tabValue, setTabValue] = useState(0);
+
+    const { data: patient, isLoading, isError } = usePatient(id);
+    const deleteMutation = useDeletePatient();
+
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
+
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this patient?')) {
+            await deleteMutation.mutateAsync(id);
+            navigate('/');
+        }
+    };
+
+    if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
+    if (isError || !patient) return <Alert severity="error">Patient not found</Alert>;
+
+    return (
+        <>
+            <Helmet>
+                <title>{patient.firstName} {patient.lastName} | PMS</title>
+            </Helmet>
+
+            {/* Header */}
+            <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <IconButton component={RouterLink} to="/">
+                    <ArrowBackIcon />
+                </IconButton>
+                <Typography variant="h4" fontWeight="bold">
+                    {patient.firstName} {patient.lastName}
+                </Typography>
+                <Chip
+                    label={patient.gender}
+                    color={patient.gender === 'male' ? 'info' : 'secondary'}
+                    sx={{ textTransform: 'capitalize', ml: 1 }}
+                />
+                <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+                    <Button
+                        variant="outlined"
+                        startIcon={<EditIcon />}
+                        component={RouterLink}
+                        to={`/patients/${id}/edit`}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        startIcon={<DeleteIcon />}
+                        onClick={handleDelete}
+                    >
+                        Delete
+                    </Button>
+                </Box>
+            </Box>
+
+            {/* Main Content */}
+            <Paper sx={{ width: '100%', mb: 4 }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="patient tabs">
+                        <Tab label="Overview" />
+                        <Tab label="Medical History" />
+                        <Tab label="Documents" />
+                    </Tabs>
+                </Box>
+
+                {/* Overview Tab */}
+                <TabPanel value={tabValue} index={0}>
+                    <Grid container spacing={4}>
+                        <Grid item xs={12} md={4}>
+                            <Card variant="outlined" sx={{ bgcolor: 'background.default' }}>
+                                <CardContent>
+                                    <Typography variant="h6" gutterBottom>Demographics</Typography>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                        <Typography variant="body2" color="text.secondary">Phone</Typography>
+                                        <Typography variant="body1">{patient.phone}</Typography>
+                                        <Divider sx={{ my: 1 }} />
+
+                                        <Typography variant="body2" color="text.secondary">Email</Typography>
+                                        <Typography variant="body1">{patient.email || 'N/A'}</Typography>
+                                        <Divider sx={{ my: 1 }} />
+
+                                        <Typography variant="body2" color="text.secondary">DOB</Typography>
+                                        <Typography variant="body1">
+                                            {formatDate(patient.dob)}
+                                        </Typography>
+                                        <Divider sx={{ my: 1 }} />
+
+                                        <Typography variant="body2" color="text.secondary">Address</Typography>
+                                        <Typography variant="body1">{patient.address || 'N/A'}</Typography>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        <Grid item xs={12} md={8}>
+                            <Typography variant="h6" gutterBottom>Recent Activity</Typography>
+                            <Alert severity="info" sx={{ mb: 2 }}>
+                                Last visit recorded on {patient.updatedAt ? format(new Date(patient.updatedAt), 'PP') : 'N/A'}
+                            </Alert>
+
+                            {/* Display Latest Vitals if available */}
+                            {patient.complaints && patient.complaints.length > 0 && (
+                                <Card variant="outlined">
+                                    <CardContent>
+                                        <Typography variant="subtitle1" fontWeight="bold">Latest Vitals</Typography>
+                                        <Grid container spacing={2} sx={{ mt: 1 }}>
+                                            <Grid item xs={3}>
+                                                <Typography variant="caption" color="text.secondary">BP</Typography>
+                                                <Typography variant="h6">{patient.complaints[0].vitals?.bp || '-'}</Typography>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <Typography variant="caption" color="text.secondary">HR</Typography>
+                                                <Typography variant="h6">{patient.complaints[0].vitals?.hr || '-'} bpm</Typography>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <Typography variant="caption" color="text.secondary">Temp</Typography>
+                                                <Typography variant="h6">{patient.complaints[0].vitals?.temp || '-'} °C</Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </Grid>
+                    </Grid>
+                </TabPanel>
+
+                {/* Medical History Tab */}
+                <TabPanel value={tabValue} index={1}>
+                    {(!patient.complaints || patient.complaints.length === 0) ? (
+                        <Typography color="text.secondary">No medical history recorded.</Typography>
+                    ) : (
+                        <Box>
+                            {patient.complaints.map((c, i) => (
+                                <Card key={c.id || i} sx={{ mb: 2 }}>
+                                    <CardContent>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <Typography variant="h6" color="primary">{c.chiefComplaint}</Typography>
+                                            <Typography variant="caption">{c.visitDate ? format(new Date(c.visitDate), 'PP') : 'Unknown Date'}</Typography>
+                                        </Box>
+                                        <Typography variant="body2" sx={{ mt: 1 }}><strong>Severity:</strong> {c.severity} | <strong>Duration:</strong> {c.duration}</Typography>
+                                        <Typography variant="body2" sx={{ mt: 1 }}>{c.notes}</Typography>
+
+                                        {c.symptoms && c.symptoms.length > 0 && (
+                                            <Box sx={{ mt: 2 }}>
+                                                <Typography variant="subtitle2">Symptoms:</Typography>
+                                                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
+                                                    {c.symptoms.map((s, idx) => (
+                                                        <Chip key={idx} label={`${s.name} (${s.severity})`} size="small" variant="outlined" />
+                                                    ))}
+                                                </Box>
+                                            </Box>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </Box>
+                    )}
+                </TabPanel>
+
+                {/* Documents Tab - Placeholder */}
+                <TabPanel value={tabValue} index={2}>
+                    <Typography color="text.secondary">No documents attached.</Typography>
+                </TabPanel>
+            </Paper>
+        </>
+    );
+};
