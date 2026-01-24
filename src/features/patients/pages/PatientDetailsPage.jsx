@@ -22,6 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { usePatient, useDeletePatient } from '../api/usePatients';
 import { Helmet } from 'react-helmet-async';
 import { formatDate } from '../../../shared/utils/dateUtils';
+import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -51,15 +52,24 @@ export const PatientDetailsPage = () => {
     const { data: patient, isLoading, isError } = usePatient(id);
     const deleteMutation = useDeletePatient();
 
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
 
-    const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this patient?')) {
-            await deleteMutation.mutateAsync(id);
-            navigate('/');
-        }
+    const handleDeleteClick = () => {
+        setIsConfirmOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        setIsConfirmOpen(false);
+        await deleteMutation.mutateAsync(id);
+        navigate('/');
+    };
+
+    const handleDeleteCancel = () => {
+        setIsConfirmOpen(false);
     };
 
     if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
@@ -97,7 +107,7 @@ export const PatientDetailsPage = () => {
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteIcon />}
-                        onClick={handleDelete}
+                        onClick={handleDeleteClick}
                     >
                         Delete
                     </Button>
@@ -212,6 +222,16 @@ export const PatientDetailsPage = () => {
                     <Typography color="text.secondary">No documents attached.</Typography>
                 </TabPanel>
             </Paper>
+
+            <ConfirmModal
+                open={isConfirmOpen}
+                title="Delete Patient"
+                message={`Are you sure you want to delete ${patient.firstName} ${patient.lastName}? This action cannot be undone.`}
+                onConfirm={handleDeleteConfirm}
+                onCancel={handleDeleteCancel}
+                confirmText="Delete"
+                severity="error"
+            />
         </>
     );
 };

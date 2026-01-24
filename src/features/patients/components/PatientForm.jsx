@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import {
@@ -21,6 +21,9 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import { LoadingButton } from '@mui/lab';
+
+import { useNavigate } from 'react-router-dom';
+import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
 
 // Import our new layout primitives
 import { FormGrid, FormField, FullWidthField, FormSection, FormFooter } from './FormStyles';
@@ -51,9 +54,17 @@ const SectionHeader = ({ icon: Icon, title }) => (
 );
 
 export const PatientForm = ({ defaultValues: initialValues, onSubmit, isSubmitting, isEditMode }) => {
-    const { control, handleSubmit, reset, formState: { errors } } = useForm({
+    const navigate = useNavigate();
+    const { control, handleSubmit, reset, formState: { errors, isDirty } } = useForm({
         defaultValues: initialValues || defaultValues,
         mode: 'onBlur',
+    });
+
+    const [modalConfig, setModalConfig] = useState({
+        open: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
     });
 
     const { fields, append, remove } = useFieldArray({
@@ -66,6 +77,39 @@ export const PatientForm = ({ defaultValues: initialValues, onSubmit, isSubmitti
             reset(initialValues);
         }
     }, [initialValues, reset]);
+
+    const handleResetClick = () => {
+        if (!isDirty) {
+            reset();
+            return;
+        }
+        setModalConfig({
+            open: true,
+            title: 'Discard Changes',
+            message: 'Are you sure you want to reset the form? All unsaved changes will be lost.',
+            onConfirm: () => {
+                reset();
+                setModalConfig(prev => ({ ...prev, open: false }));
+            }
+        });
+    };
+
+    const handleCancelClick = () => {
+        if (!isDirty) {
+            navigate(-1);
+            return;
+        }
+        setModalConfig({
+            open: true,
+            title: 'Discard Changes',
+            message: 'You have unsaved changes. Are you sure you want to quit editing?',
+            onConfirm: () => {
+                navigate(-1);
+            }
+        });
+    };
+
+    const closeModal = () => setModalConfig(prev => ({ ...prev, open: false }));
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} style={{ paddingBottom: '80px' }}>
@@ -336,8 +380,11 @@ export const PatientForm = ({ defaultValues: initialValues, onSubmit, isSubmitti
             </FormSection>
 
             <FormFooter>
-                <Button variant="text" size="large" onClick={() => reset()} disabled={isSubmitting}>
-                    Reset
+                <Button variant="text" color="inherit" onClick={handleCancelClick} disabled={isSubmitting}>
+                    Cancel
+                </Button>
+                <Button variant="text" color="warning" onClick={handleResetClick} disabled={isSubmitting}>
+                    Reset Form
                 </Button>
                 <LoadingButton
                     loading={isSubmitting}
@@ -350,6 +397,16 @@ export const PatientForm = ({ defaultValues: initialValues, onSubmit, isSubmitti
                     {isEditMode ? 'Update Patient' : 'Save Patient'}
                 </LoadingButton>
             </FormFooter>
+
+            <ConfirmModal
+                open={modalConfig.open}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                onConfirm={modalConfig.onConfirm}
+                onCancel={closeModal}
+                confirmText="Discard"
+                severity="error"
+            />
         </form>
     );
 };
