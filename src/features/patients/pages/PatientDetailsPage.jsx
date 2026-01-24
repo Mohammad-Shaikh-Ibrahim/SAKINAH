@@ -21,7 +21,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { usePatient, useDeletePatient } from '../api/usePatients';
 import { Helmet } from 'react-helmet-async';
-import { format } from 'date-fns';
+import { formatDate } from '../../../shared/utils/dateUtils';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -145,7 +145,7 @@ export const PatientDetailsPage = () => {
                         <Grid item xs={12} md={8}>
                             <Typography variant="h6" gutterBottom>Recent Activity</Typography>
                             <Alert severity="info" sx={{ mb: 2 }}>
-                                Last visit recorded on {patient.updatedAt ? format(new Date(patient.updatedAt), 'PP') : 'N/A'}
+                                Last visit recorded on {formatDate(patient.updatedAt)}
                             </Alert>
 
                             {/* Display Latest Vitals if available */}
@@ -185,7 +185,7 @@ export const PatientDetailsPage = () => {
                                     <CardContent>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <Typography variant="h6" color="primary">{c.chiefComplaint}</Typography>
-                                            <Typography variant="caption">{c.visitDate ? format(new Date(c.visitDate), 'PP') : 'Unknown Date'}</Typography>
+                                            <Typography variant="caption">{formatDate(c.visitDate)}</Typography>
                                         </Box>
                                         <Typography variant="body2" sx={{ mt: 1 }}><strong>Severity:</strong> {c.severity} | <strong>Duration:</strong> {c.duration}</Typography>
                                         <Typography variant="body2" sx={{ mt: 1 }}>{c.notes}</Typography>
