@@ -14,7 +14,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu'; // Ensure @mui/icons-material is installed
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 
-export const MainLayout = () => {
+export const DashboardLayout = () => {
     const location = useLocation();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
