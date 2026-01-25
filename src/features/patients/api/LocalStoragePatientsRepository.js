@@ -7,6 +7,10 @@ const STORAGE_KEY = 'patients_db_v1';
 const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
 class LocalStoragePatientsRepository {
+    constructor() {
+        this.init();
+    }
+
     async init() {
         const existing = localStorage.getItem(STORAGE_KEY);
         if (!existing) {

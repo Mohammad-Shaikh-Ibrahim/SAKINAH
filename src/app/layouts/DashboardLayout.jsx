@@ -42,8 +42,10 @@ export const DashboardLayout = () => {
     };
 
     const navItems = [
-        { label: 'Patients', path: '/dashboard' },
-        // Future: Appointments, Reports
+        { label: 'Overview', path: '/dashboard' },
+        { label: 'Patients', path: '/dashboard/patients' },
+        { label: 'Appointments', path: '/dashboard/appointments' },
+        // Future: Reports
     ];
 
     return (

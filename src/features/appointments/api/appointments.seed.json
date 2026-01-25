@@ -1,0 +1,73 @@
+{
+  "appointments": [
+    {
+      "id": "apt-001",
+      "patientId": "p-101",
+      "doctorId": "u-1",
+      "appointmentDate": "2026-01-27",
+      "startTime": "10:00",
+      "endTime": "10:30",
+      "duration": 30,
+      "type": "consultation",
+      "status": "scheduled",
+      "reason": "Follow-up for hypertension management",
+      "notes": "Check blood pressure readings",
+      "reminderSent": false,
+      "createdAt": "2026-01-20T10:00:00Z",
+      "updatedAt": "2026-01-20T10:00:00Z"
+    }
+  ],
+  "doctorAvailability": [
+    {
+      "id": "av-1",
+      "doctorId": "u-1",
+      "dayOfWeek": 1,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "breakStartTime": "13:00",
+      "breakEndTime": "14:00",
+      "isActive": true
+    },
+    {
+      "id": "av-2",
+      "doctorId": "u-1",
+      "dayOfWeek": 2,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "breakStartTime": "13:00",
+      "breakEndTime": "14:00",
+      "isActive": true
+    },
+    {
+      "id": "av-3",
+      "doctorId": "u-1",
+      "dayOfWeek": 3,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "breakStartTime": "13:00",
+      "breakEndTime": "14:00",
+      "isActive": true
+    },
+    {
+      "id": "av-4",
+      "doctorId": "u-1",
+      "dayOfWeek": 4,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "breakStartTime": "13:00",
+      "breakEndTime": "14:00",
+      "isActive": true
+    },
+    {
+      "id": "av-5",
+      "doctorId": "u-1",
+      "dayOfWeek": 5,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "breakStartTime": "13:00",
+      "breakEndTime": "14:00",
+      "isActive": true
+    }
+  ],
+  "timeOffBlocks": []
+}

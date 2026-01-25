@@ -12,6 +12,9 @@ const SignUpPage = lazy(() => import('../../features/auth/pages/SignUpPage').the
 const PatientsListPage = lazy(() => import('../../features/patients/pages/PatientsListPage').then(module => ({ default: module.PatientsListPage })));
 const PatientCreateEditPage = lazy(() => import('../../features/patients/pages/PatientCreateEditPage').then(module => ({ default: module.PatientCreateEditPage })));
 const PatientDetailsPage = lazy(() => import('../../features/patients/pages/PatientDetailsPage').then(module => ({ default: module.PatientDetailsPage })));
+const AppointmentsPage = lazy(() => import('../../features/appointments/pages/AppointmentsPage').then(module => ({ default: module.AppointmentsPage })));
+const AvailabilitySettingsPage = lazy(() => import('../../features/appointments/pages/AvailabilitySettingsPage').then(module => ({ default: module.AvailabilitySettingsPage })));
+const DashboardHomePage = lazy(() => import('../../features/dashboard/pages/DashboardHomePage').then(module => ({ default: module.DashboardHomePage })));
 
 const Loading = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -60,6 +63,14 @@ export const router = createBrowserRouter([
                         index: true,
                         element: (
                             <Suspense fallback={<Loading />}>
+                                <DashboardHomePage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: 'patients',
+                        element: (
+                            <Suspense fallback={<Loading />}>
                                 <PatientsListPage />
                             </Suspense>
                         ),
@@ -85,6 +96,22 @@ export const router = createBrowserRouter([
                         element: (
                             <Suspense fallback={<Loading />}>
                                 <PatientCreateEditPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: 'appointments',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <AppointmentsPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: 'appointments/settings',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <AvailabilitySettingsPage />
                             </Suspense>
                         ),
                     },
