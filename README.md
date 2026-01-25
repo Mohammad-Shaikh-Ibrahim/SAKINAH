@@ -1,132 +1,89 @@
-# Patient Management System
+# SAKINAH (Patient Management System)
 
-A modern React-based patient management system that demonstrates different form handling approaches using React Hook Form and MUI.
+SAKINAH is a modern, premium Patient Management System (PMS) designed to provide a calm and efficient care experience. It features a secure authentication system, patient ownership model, and a comprehensive dashboard for recording medical history and vitals.
 
-![image](https://github.com/user-attachments/assets/21ac58e9-ef5f-4ef7-a345-3d0f4ade52c2)
+![SAKINAH Logo](logo.png)
 
+## 🌟 Features
 
-## Features
+- **Secure Authentication**: Register and login to your own private medical workspace.
+- **Patient Ownership**: Each doctor/account only sees and manages their own registered patients.
+- **Dynamic Dashboard**: Responsive patient list with search and pagination.
+- **Comprehensive Patient Intake**: Record detailed patient demographics, chief complaints, vitals, and symptoms.
+- **Medical History**: Track patient progress through chronological visit logs.
+- **Premium UI/UX**: Built with a "peace in care" aesthetic using Material UI (MUI) and custom animations.
+- **Safety First**: Confirmation modals for critical actions like logout and patient deletion.
 
-- **Dual Form Implementation**: The project showcases two different approaches to form handling:
-  - React Hook Form implementation
-  - Formik implementation
-- **Form Validation**: Comprehensive form validation including:
-  - Required field validation
-  - Name format validation (no numbers allowed)
-  - Date validation (no future dates)
-  - Minimum/maximum length validation
-  - Multiple disorder selection validation
-- **Modern UI Components**: Built with Material-UI (MUI) components
-- **Styled Components**: Reusable styled components for consistent UI
-- **Responsive Design**: Mobile-friendly layout
-- **Date Picker**: Integrated MUI Date Picker for birth date selection
-- **Form Fields**:
-  - First Name
-  - Last Name
-  - Gender (Radio buttons)
-  - Date of Birth
-  - Disorders (Multiple selection)
-  - Workspace Template (Dropdown)
+## 🚀 Technologies Used
 
-## Technologies Used
+- **Frontend Core**: React 18, Vite
+- **State Management**: Redux Toolkit (Session and Auth)
+- **Data Fetching**: TanStack Query (React Query)
+- **UI Framework**: Material UI (MUI)
+- **Styling**: Emotion, styled-components
+- **Routing**: React Router 6
+- **Form Handling**: React Hook Form
+- **Storage**: LocalStorage (Mock Database)
+- **Utilities**: date-fns, uuid, react-helmet-async
 
-- React
-- Vite
-- React Router
-- Material-UI (MUI)
-- Styled Components
-- React Hook Form
-- Formik
-- Yup (for form validation)
-- @mui/x-date-pickers
+## 🛠️ Project Structure
 
-## Getting Started
+The project follows a feature-based architecture:
+
+```text
+SAKINAH/
+├── src/
+│   ├── app/                # Global app logic (router, layouts, providers)
+│   ├── features/           # Modular features
+│   │   ├── auth/           # Login, Registration, Session management
+│   │   ├── patients/       # Patient lists, forms, details, medical history
+│   │   └── landing/        # Landing page and navigation
+│   ├── shared/             # Reusable UI components and utilities
+│   ├── App.jsx             # Root component
+│   └── main.jsx            # Entry point
+└── public/                 # Static assets (logo, background images)
+```
+
+## 📦 Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm or yarn
+- Node.js (v16.x or later)
+- npm
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
    ```bash
    git clone [repository-url]
-   cd Patients-Mangemant-System
+   cd SAKINAH
    ```
-2. Install dependencies:
+
+2. **Install dependencies:**
    ```bash
    npm install
-   # or
-   yarn install
    ```
-3. Start the development server:
+
+3. **Start the development server:**
    ```bash
    npm run dev
-   # or
-   yarn dev
    ```
 
-The application will be available at `http://localhost:5173`
+The application will be available at `http://localhost:5173`.
 
-### Build for Production
+### Default Credentials (for testing)
+- **Username:** `admin@sakinah.com`
+- **Password:** `password123`
 
-To create a production build:
+## 🛡️ Privacy & Security
 
-```bash
-npm run build
-# or
-yarn build
-```
+SAKINAH uses a mock repository that simulates a real database with LocalStorage. 
+- **Patient Isolation:** Patients created by one user are strictly filtered so other users cannot see them.
+- **Ownership Verification:** All CRUD operations (Create, Read, Update, Delete) are verified against the logged-in session.
 
-To preview the production build:
+## 📝 License
 
-```bash
-npm run preview
-# or
-yarn preview
-```
+This project is licensed under the MIT License.
 
-## Project Structure
-
-```
-src/
-├── components/
-│   └── shared/
-│       └── FormStyles.jsx    # Shared styled components
-├── pages/
-│   ├── AddPatientFormikForm.jsx    # Formik implementation
-│   └── AddPatientReactHookForm.jsx # React Hook Form implementation
-├── hooks/
-│   └── usePatients.js       # Custom hook for patient management
-└── App.jsx                  # Main application component
-```
-
-## Form Features
-
-### Patient Information
-
-- First and last name validation (2-50 characters, no numbers)
-- Gender selection (Male/Female)
-- Date of birth with future date validation
-- Multiple disorder selection
-- Workspace template selection
-
-### Styling
-
-- Consistent styling across both form implementations
-- Responsive design
-- Visual feedback for form validation
-- Custom styled components for form elements
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
+© 2026 SAKINAH. Created with care by [Al-Shaikh](https://github.com/Mohammad-Shaikh-Ibrahim).
