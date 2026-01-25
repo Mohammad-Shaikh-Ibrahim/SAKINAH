@@ -1,0 +1,137 @@
+{
+  "medications": [
+    {
+      "id": "med-001",
+      "brandName": "Lipitor",
+      "genericName": "Atorvastatin",
+      "category": "Statin",
+      "commonDosages": ["10mg", "20mg", "40mg", "80mg"],
+      "commonForms": ["tablet"],
+      "commonInstructions": "Take once daily in the evening with or without food",
+      "warnings": [
+        "May cause muscle pain or weakness",
+        "Avoid grapefruit juice",
+        "Monitor liver function"
+      ],
+      "requiresPrescription": true
+    },
+    {
+      "id": "med-002",
+      "brandName": "Norvasc",
+      "genericName": "Amlodipine",
+      "category": "Calcium Channel Blocker",
+      "commonDosages": ["2.5mg", "5mg", "10mg"],
+      "commonForms": ["tablet"],
+      "commonInstructions": "Take once daily, with or without food",
+      "warnings": [
+        "May cause swelling in ankles",
+        "May cause dizziness"
+      ],
+      "requiresPrescription": true
+    },
+    {
+      "id": "med-003",
+      "brandName": "Amoxil",
+      "genericName": "Amoxicillin",
+      "category": "Antibiotic",
+      "commonDosages": ["250mg", "500mg", "875mg"],
+      "commonForms": ["capsule", "tablet", "syrup"],
+      "commonInstructions": "Take 2-3 times daily with food",
+      "warnings": [
+        "Complete full course even if feeling better",
+        "May cause diarrhea",
+        "Inform doctor if allergic to penicillin"
+      ],
+      "requiresPrescription": true
+    },
+    {
+      "id": "med-004",
+      "brandName": "Zestril",
+      "genericName": "Lisinopril",
+      "category": "ACE Inhibitor",
+      "commonDosages": ["2.5mg", "5mg", "10mg", "20mg", "40mg"],
+      "commonForms": ["tablet"],
+      "commonInstructions": "Take once daily",
+      "warnings": [
+        "May cause dry cough",
+        "Avoid potassium supplements unless prescribed",
+        "May cause dizziness upon standing"
+      ],
+      "requiresPrescription": true
+    },
+    {
+        "id": "med-005",
+        "brandName": "Glucophage",
+        "genericName": "Metformin",
+        "category": "Antidiabetic",
+        "commonDosages": ["500mg", "850mg", "1000mg"],
+        "commonForms": ["tablet", "extended-release tablet"],
+        "commonInstructions": "Take with meals to reduce stomach upset",
+        "warnings": [
+            "May cause gastrointestinal upset",
+            "Stop temporarily before iodinated contrast imaging",
+            "Monitor kidney function"
+        ],
+        "requiresPrescription": true
+    },
+    {
+        "id": "med-006",
+        "brandName": "Tylenol",
+        "genericName": "Acetaminophen",
+        "category": "Analgesic",
+        "commonDosages": ["325mg", "500mg", "650mg"],
+        "commonForms": ["tablet", "capsule", "liquid"],
+        "commonInstructions": "Take every 4-6 hours as needed for pain/fever",
+        "warnings": [
+            "Do not exceed 4000mg per day",
+            "Avoid alcohol while taking",
+            "Liver damage risk with overdose"
+        ],
+        "requiresPrescription": false
+    },
+    {
+        "id": "med-007",
+        "brandName": "Advil",
+        "genericName": "Ibuprofen",
+        "category": "NSAID",
+        "commonDosages": ["200mg", "400mg", "600mg", "800mg"],
+        "commonForms": ["tablet", "capsule", "liquid"],
+        "commonInstructions": "Take with food to prevent stomach upset",
+        "warnings": [
+            "Risk of stomach bleeding",
+            "May increase blood pressure",
+            "Caution in patients with kidney disease"
+        ],
+        "requiresPrescription": false
+    },
+    {
+        "id": "med-008",
+        "brandName": "Warfarin",
+        "genericName": "Warfarin",
+        "category": "Anticoagulant",
+        "commonDosages": ["1mg", "2mg", "2.5mg", "3mg", "4mg", "5mg", "6mg", "7.5mg", "10mg"],
+        "commonForms": ["tablet"],
+        "commonInstructions": "Take once daily at the same time",
+        "warnings": [
+            "High risk of bleeding",
+            "Regular INR monitoring required",
+            "Consistent Vitamin K intake needed"
+        ],
+        "requiresPrescription": true
+    },
+    {
+        "id": "med-009",
+        "brandName": "Aspirin",
+        "genericName": "Aspirin",
+        "category": "Antiplatelet",
+        "commonDosages": ["81mg", "325mg"],
+        "commonForms": ["tablet", "enteric-coated tablet"],
+        "commonInstructions": "Take with food",
+        "warnings": [
+            "Risk of bleeding",
+            "Do not give to children/teens with viral infection (Reye's syndrome)"
+        ],
+        "requiresPrescription": false
+    }
+  ]
+}

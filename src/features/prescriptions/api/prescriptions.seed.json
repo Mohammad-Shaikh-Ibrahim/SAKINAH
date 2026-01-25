@@ -1,0 +1,66 @@
+{
+  "prescriptions": [
+    {
+      "id": "rx-001",
+      "patientId": "patient-001",
+      "doctorId": "user-001",
+      "prescriptionDate": "2026-01-20",
+      "medications": [
+        {
+          "id": "rxmed-001",
+          "medicationName": "Lisinopril",
+          "genericName": "Lisinopril",
+          "dosage": "10mg",
+          "form": "tablet",
+          "frequency": "Once daily",
+          "customFrequency": "",
+          "route": "oral",
+          "duration": "90 days",
+          "customDuration": "",
+          "quantity": "90",
+          "refills": 3,
+          "refillsUsed": 0,
+          "instructions": "Take one tablet in the morning with or without food",
+          "startDate": "2026-01-20",
+          "endDate": "2026-04-20",
+          "status": "active"
+        },
+        {
+          "id": "rxmed-002",
+          "medicationName": "Atorvastatin",
+          "genericName": "Atorvastatin",
+          "dosage": "20mg",
+          "form": "tablet",
+          "frequency": "Once daily",
+          "route": "oral",
+          "duration": "90 days",
+          "quantity": "90",
+          "refills": 3,
+          "refillsUsed": 0,
+          "instructions": "Take one tablet in the evening. Avoid grapefruit juice.",
+          "startDate": "2026-01-20",
+          "endDate": "2026-04-20",
+          "status": "active"
+        }
+      ],
+      "diagnosis": "Essential Hypertension and Hyperlipidemia",
+      "notes": "Patient counseled on lifestyle modifications including diet and exercise. Follow-up in 3 months for BP and lipid panel check.",
+      "status": "active",
+      "isPrinted": true,
+      "createdAt": "2026-01-20T14:30:00Z",
+      "updatedAt": "2026-01-20T14:30:00Z"
+    }
+  ],
+  "patientAllergies": [
+      {
+          "id": "alg-001",
+          "patientId": "patient-001",
+          "allergyType": "medication",
+          "allergen": "Penicillin",
+          "reaction": "Hives and swelling",
+          "severity": "severe",
+          "onsetDate": "2015-05-10",
+          "isActive": true
+      }
+  ]
+}

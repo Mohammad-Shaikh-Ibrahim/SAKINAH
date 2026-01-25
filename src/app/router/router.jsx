@@ -15,6 +15,8 @@ const PatientDetailsPage = lazy(() => import('../../features/patients/pages/Pati
 const AppointmentsPage = lazy(() => import('../../features/appointments/pages/AppointmentsPage').then(module => ({ default: module.AppointmentsPage })));
 const AvailabilitySettingsPage = lazy(() => import('../../features/appointments/pages/AvailabilitySettingsPage').then(module => ({ default: module.AvailabilitySettingsPage })));
 const DashboardHomePage = lazy(() => import('../../features/dashboard/pages/DashboardHomePage').then(module => ({ default: module.DashboardHomePage })));
+const PrescriptionCreateEditPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionCreateEditPage').then(module => ({ default: module.PrescriptionCreateEditPage })));
+const PrescriptionsListPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionsListPage').then(module => ({ default: module.PrescriptionsListPage })));
 
 const Loading = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -96,6 +98,30 @@ export const router = createBrowserRouter([
                         element: (
                             <Suspense fallback={<Loading />}>
                                 <PatientCreateEditPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: 'patients/:patientId/prescriptions/new',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <PrescriptionCreateEditPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: 'prescriptions',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <PrescriptionsListPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: 'prescriptions/new',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <PrescriptionCreateEditPage />
                             </Suspense>
                         ),
                     },

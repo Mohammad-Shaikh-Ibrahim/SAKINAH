@@ -1,0 +1,36 @@
+{
+  "interactions": [
+    {
+      "id": "int-001",
+      "medication1": "Warfarin",
+      "medication2": "Aspirin",
+      "interactionType": "major",
+      "description": "Increased risk of bleeding when anticoagulants are combined with antiplatelet agents",
+      "recommendation": "Use combination only if benefit outweighs risk. Monitor INR closely and watch for signs of bleeding."
+    },
+    {
+      "id": "int-002",
+      "medication1": "Lisinopril",
+      "medication2": "Potassium supplements",
+      "interactionType": "moderate",
+      "description": "ACE inhibitors can increase potassium levels, combining with potassium supplements may cause hyperkalemia",
+      "recommendation": "Monitor serum potassium levels regularly. Consider reducing potassium supplementation."
+    },
+    {
+        "id": "int-003",
+        "medication1": "Atorvastatin",
+        "medication2": "Clarithromycin",
+        "interactionType": "major",
+        "description": "Clarithromycin increases Atorvastatin levels, increasing risk of myopathy/rhabdomyolysis",
+        "recommendation": "Avoid combination or use alternative antibiotic. If necessary, hold statin during antibiotic course."
+    },
+    {
+        "id": "int-004",
+        "medication1": "Lisinopril",
+        "medication2": "Ibuprofen",
+        "interactionType": "moderate",
+        "description": "NSAIDs may reduce the antihypertensive effect of ACE inhibitors and increase risk of renal impairment",
+        "recommendation": "Monitor blood pressure and renal function. Use lowest effective dose of NSAID for shortest duration."
+    }
+  ]
+}

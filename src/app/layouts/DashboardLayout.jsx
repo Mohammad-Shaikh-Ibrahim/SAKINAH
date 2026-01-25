@@ -45,6 +45,7 @@ export const DashboardLayout = () => {
         { label: 'Overview', path: '/dashboard' },
         { label: 'Patients', path: '/dashboard/patients' },
         { label: 'Appointments', path: '/dashboard/appointments' },
+        { label: 'Prescriptions', path: '/dashboard/prescriptions' }, // Placeholder route, mainly for list
         // Future: Reports
     ];
 

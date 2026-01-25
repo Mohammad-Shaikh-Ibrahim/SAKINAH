@@ -23,6 +23,7 @@ import { usePatient, useDeletePatient } from '../api/usePatients';
 import { Helmet } from 'react-helmet-async';
 import { formatDate } from '../../../shared/utils/dateUtils';
 import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
+import { PrescriptionsListPage } from '../../prescriptions/pages/PrescriptionsListPage';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -120,6 +121,7 @@ export const PatientDetailsPage = () => {
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="patient tabs">
                         <Tab label="Overview" />
                         <Tab label="Medical History" />
+                        <Tab label="Prescriptions" />
                         <Tab label="Documents" />
                     </Tabs>
                 </Box>
@@ -217,8 +219,13 @@ export const PatientDetailsPage = () => {
                     )}
                 </TabPanel>
 
-                {/* Documents Tab - Placeholder */}
+                {/* Prescriptions Tab */}
                 <TabPanel value={tabValue} index={2}>
+                    <PrescriptionsListPage />
+                </TabPanel>
+
+                {/* Documents Tab - Placeholder */}
+                <TabPanel value={tabValue} index={3}>
                     <Typography color="text.secondary">No documents attached.</Typography>
                 </TabPanel>
             </Paper>
