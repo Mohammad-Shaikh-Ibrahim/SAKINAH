@@ -43,7 +43,6 @@ export const DashboardLayout = () => {
 
     const navItems = [
         { label: 'Patients', path: '/dashboard' },
-        { label: 'Add Patient', path: '/dashboard/patients/new' },
         // Future: Appointments, Reports
     ];
 
@@ -52,24 +51,35 @@ export const DashboardLayout = () => {
             <AppBar position="sticky" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
-                        <LocalHospitalIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: 'primary.main' }} />
-                        <Typography
-                            variant="h6"
-                            noWrap
+                        <Box
                             component={RouterLink}
                             to="/dashboard"
                             sx={{
                                 mr: 4,
-                                display: { xs: 'none', md: 'flex' },
-                                fontFamily: 'monospace',
-                                fontWeight: 700,
-                                letterSpacing: '.1rem',
-                                color: 'primary.main',
+                                display: 'flex',
+                                alignItems: 'center',
                                 textDecoration: 'none',
+                                color: 'primary.main',
+                                gap: 1.5
                             }}
                         >
-                            SAKINAH
-                        </Typography>
+                            <img
+                                src={`${import.meta.env.BASE_URL}logo.png`}
+                                alt="SAKINAH"
+                                style={{ height: '40px' }}
+                            />
+                            <Typography
+                                variant="h6"
+                                noWrap
+                                sx={{
+                                    fontFamily: 'monospace',
+                                    fontWeight: 700,
+                                    letterSpacing: '.1rem',
+                                }}
+                            >
+                                SAKINAH
+                            </Typography>
+                        </Box>
 
                         {/* Mobile Menu Placeholder */}
                         <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -144,7 +154,7 @@ export const DashboardLayout = () => {
                     <Typography variant="body2" color="text.secondary" align="center">
                         {'© '}
                         {new Date().getFullYear()}
-                        {' Patients Management System. Al-Shaikh.'}
+                        {' SAKINAH. Al-Shaikh.'}
                     </Typography>
                 </Container>
             </Box>
