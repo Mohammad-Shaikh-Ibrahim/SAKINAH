@@ -102,7 +102,7 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
                                                 size="small"
                                                 color="primary"
                                                 component={RouterLink}
-                                                to={`/patients/${patient.id}`}
+                                                to={`/dashboard/patients/${patient.id}`}
                                             >
                                                 <VisibilityIcon fontSize="small" />
                                             </IconButton>
@@ -112,7 +112,7 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
                                                 size="small"
                                                 color="info"
                                                 component={RouterLink}
-                                                to={`/patients/${patient.id}/edit`}
+                                                to={`/dashboard/patients/${patient.id}/edit`}
                                             >
                                                 <EditIcon fontSize="small" />
                                             </IconButton>

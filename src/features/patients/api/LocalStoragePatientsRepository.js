@@ -26,9 +26,14 @@ class LocalStoragePatientsRepository {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
-    async getAll({ search = '', page = 1, limit = 10, sort = 'desc' } = {}) {
+    async getAll({ userId, search = '', page = 1, limit = 10, sort = 'desc' } = {}) {
         await delay();
         let patients = this._getAll();
+
+        // Filter by owner
+        if (userId) {
+            patients = patients.filter(p => p.createdBy === userId);
+        }
 
         // Filter
         if (search) {
@@ -63,25 +68,29 @@ class LocalStoragePatientsRepository {
         };
     }
 
-    async getById(id) {
+    async getById(id, userId) {
         await delay();
         const patients = this._getAll();
         const patient = patients.find((p) => p.id === id);
         if (!patient) throw new Error('Patient not found');
+
+        // Access check
+        if (userId && patient.createdBy !== userId) {
+            throw new Error('Access denied');
+        }
+
         return patient;
     }
 
-    async create(patientData) {
+    async create(patientData, userId) {
         await delay(800);
         const patients = this._getAll();
-
-        // Check duplication logic if needed 
-        // (e.g., same phone number?)
 
         const newPatient = {
             id: `p-${uuidv4()}`,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
+            createdBy: userId, // Associate with user
             ...patientData,
             complaints: patientData.complaints || [],
         };
@@ -91,12 +100,17 @@ class LocalStoragePatientsRepository {
         return newPatient;
     }
 
-    async update(id, updates) {
+    async update(id, updates, userId) {
         await delay(800);
         const patients = this._getAll();
         const index = patients.findIndex((p) => p.id === id);
 
         if (index === -1) throw new Error('Patient not found');
+
+        // Access check
+        if (userId && patients[index].createdBy !== userId) {
+            throw new Error('Access denied');
+        }
 
         const updatedPatient = {
             ...patients[index],
@@ -109,11 +123,16 @@ class LocalStoragePatientsRepository {
         return updatedPatient;
     }
 
-    async delete(id) {
+    async delete(id, userId) {
         await delay(600);
         let patients = this._getAll();
-        const exists = patients.some((p) => p.id === id);
-        if (!exists) throw new Error('Patient not found');
+        const patient = patients.find((p) => p.id === id);
+        if (!patient) throw new Error('Patient not found');
+
+        // Access check
+        if (userId && patient.createdBy !== userId) {
+            throw new Error('Access denied');
+        }
 
         patients = patients.filter((p) => p.id !== id);
         this._save(patients);

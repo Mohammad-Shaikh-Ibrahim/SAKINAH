@@ -23,7 +23,7 @@ export const PatientCreateEditPage = () => {
             } else {
                 await createMutation.mutateAsync(data);
             }
-            navigate('/');
+            navigate('/dashboard');
         } catch (error) {
             console.error('Failed to save patient:', error);
         }
@@ -66,7 +66,7 @@ export const PatientCreateEditPage = () => {
     return (
         <Container maxWidth="md">
             <Helmet>
-                <title>{isEditMode ? 'Edit Patient' : 'Add Patient'} | PMS</title>
+                <title>{isEditMode ? 'Edit Patient' : 'Add Patient'} | SAKINAH</title>
             </Helmet>
 
             <Box sx={{ mb: 4 }}>

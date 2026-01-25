@@ -1,5 +1,7 @@
-import React from 'react';
-import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout, selectCurrentUser } from '../../features/auth/store/authSlice';
 import {
     AppBar,
     Toolbar,
@@ -13,15 +15,35 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu'; // Ensure @mui/icons-material is installed
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { ConfirmModal } from '../../shared/ui/ConfirmModal';
 
 export const DashboardLayout = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const user = useSelector(selectCurrentUser);
     const location = useLocation();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+
+    const handleLogoutClick = () => {
+        setIsLogoutOpen(true);
+    };
+
+    const handleLogoutConfirm = () => {
+        setIsLogoutOpen(false);
+        dispatch(logout());
+        navigate('/signin');
+    };
+
+    const handleLogoutCancel = () => {
+        setIsLogoutOpen(false);
+    };
 
     const navItems = [
-        { label: 'Patients', path: '/' },
-        { label: 'Add Patient', path: '/patients/new' },
+        { label: 'Patients', path: '/dashboard' },
+        { label: 'Add Patient', path: '/dashboard/patients/new' },
         // Future: Appointments, Reports
     ];
 
@@ -35,7 +57,7 @@ export const DashboardLayout = () => {
                             variant="h6"
                             noWrap
                             component={RouterLink}
-                            to="/"
+                            to="/dashboard"
                             sx={{
                                 mr: 4,
                                 display: { xs: 'none', md: 'flex' },
@@ -46,7 +68,7 @@ export const DashboardLayout = () => {
                                 textDecoration: 'none',
                             }}
                         >
-                            PMS
+                            SAKINAH
                         </Typography>
 
                         {/* Mobile Menu Placeholder */}
@@ -84,6 +106,21 @@ export const DashboardLayout = () => {
                                 </Button>
                             ))}
                         </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                {user?.fullName}
+                            </Typography>
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                startIcon={<LogoutIcon />}
+                                onClick={handleLogoutClick}
+                            >
+                                Logout
+                            </Button>
+                        </Box>
                     </Toolbar>
                 </Container>
             </AppBar>
@@ -91,6 +128,16 @@ export const DashboardLayout = () => {
             <Container component="main" maxWidth="xl" sx={{ flexGrow: 1, py: 4 }}>
                 <Outlet />
             </Container>
+
+            <ConfirmModal
+                open={isLogoutOpen}
+                title="Logout Confirmation"
+                message="Are you sure you want to log out of your account?"
+                onConfirm={handleLogoutConfirm}
+                onCancel={handleLogoutCancel}
+                confirmText="Logout"
+                severity="error"
+            />
 
             <Box component="footer" sx={{ py: 3, px: 2, mt: 'auto', bgcolor: 'background.paper', borderTop: '1px solid', borderColor: 'divider' }}>
                 <Container maxWidth="sm">

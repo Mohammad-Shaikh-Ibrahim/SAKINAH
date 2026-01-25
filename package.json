@@ -1,9 +1,9 @@
 {
-  "name": "patients-mangemant-system",
+  "name": "sakinah",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://github.io/Mohammad-Shaikh-Ibrahim/Patients-Mangemant-System/",
+  "homepage": "https://github.io/Mohammad-Shaikh-Ibrahim/SAKINAH/",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",

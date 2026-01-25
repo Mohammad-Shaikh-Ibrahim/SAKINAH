@@ -15,8 +15,11 @@ import { Link as RouterLink } from 'react-router-dom';
 import { usePatients } from '../api/usePatients';
 import { PatientsTable } from '../components/PatientsTable';
 import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from '../../auth/store/authSlice';
 
 export const PatientsListPage = () => {
+    const user = useSelector(selectCurrentUser);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const limit = 10;
@@ -42,8 +45,12 @@ export const PatientsListPage = () => {
     return (
         <>
             <Helmet>
-                <title>Patients | PMS</title>
+                <title>Patients | SAKINAH</title>
             </Helmet>
+
+            <Alert severity="info" sx={{ mb: 3, borderRadius: 2, bgcolor: 'rgba(45, 149, 150, 0.05)', color: '#2D9596', border: '1px solid rgba(45, 149, 150, 0.2)' }}>
+                Welcome back, <strong>{user?.fullName}</strong>! You are viewing the Sakinah Patient Management Dashboard.
+            </Alert>
 
             <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
                 <Typography variant="h4" component="h1" fontWeight="bold" color="text.primary">
@@ -54,7 +61,7 @@ export const PatientsListPage = () => {
                     color="primary"
                     startIcon={<AddIcon />}
                     component={RouterLink}
-                    to="/patients/new"
+                    to="/dashboard/patients/new"
                     sx={{ height: 48, px: 3 }}
                 >
                     Add Patient

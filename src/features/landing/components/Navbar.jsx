@@ -1,8 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { StyledButton } from '../../../shared/ui/StyledButton';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import { Link as RouterLink } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { Typography } from '@mui/material';
+import { selectAuth, logout } from '../../auth/store/authSlice';
 
 const NavContainer = styled.nav`
   position: fixed;
@@ -73,6 +75,8 @@ const ButtonGroup = styled.div`
 `;
 
 export const Navbar = () => {
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector(selectAuth);
   return (
     <NavContainer>
       <NavContent>
@@ -81,12 +85,28 @@ export const Navbar = () => {
           <span>SAKINAH</span>
         </Logo>
         <ButtonGroup>
-          <StyledButton variant="ghost" as={RouterLink} to="/dashboard">
-            Sign In
-          </StyledButton>
-          <StyledButton variant="primary">
-            Sign Up
-          </StyledButton>
+          {!isAuthenticated ? (
+            <>
+              <StyledButton variant="ghost" as={RouterLink} to="/signin">
+                Sign In
+              </StyledButton>
+              <StyledButton variant="primary" as={RouterLink} to="/signup">
+                Sign Up
+              </StyledButton>
+            </>
+          ) : (
+            <>
+              <Typography variant="body2" sx={{ alignSelf: 'center', mr: 2, color: '#2D9596', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
+                Hi, {user?.fullName?.split(' ')[0]}
+              </Typography>
+              <StyledButton variant="secondary" as={RouterLink} to="/dashboard">
+                Dashboard
+              </StyledButton>
+              <StyledButton variant="ghost" onClick={() => dispatch(logout())}>
+                Logout
+              </StyledButton>
+            </>
+          )}
         </ButtonGroup>
       </NavContent>
     </NavContainer>

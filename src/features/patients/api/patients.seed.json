@@ -10,6 +10,7 @@
     "address": "Riyadh, Olaya St.",
     "createdAt": "2025-01-10T09:00:00Z",
     "lastVisit": "2025-01-20T10:30:00Z",
+    "createdBy": "u-1",
     "complaints": [
       {
         "id": "c-1",
@@ -41,6 +42,7 @@
     "address": "Jeddah, Cornish Rd.",
     "createdAt": "2025-01-15T14:20:00Z",
     "lastVisit": "2025-01-15T14:20:00Z",
+    "createdBy": "u-1",
     "complaints": [
       {
         "id": "c-2",
@@ -71,6 +73,7 @@
     "address": "Dammam, King Fahd Rd.",
     "createdAt": "2025-01-05T11:00:00Z",
     "lastVisit": null,
+    "createdBy": "u-1",
     "complaints": []
   }
 ]

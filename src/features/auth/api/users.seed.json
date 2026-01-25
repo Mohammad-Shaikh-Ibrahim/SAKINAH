@@ -1,0 +1,10 @@
+[
+  {
+    "id": "u-1",
+    "fullName": "Admin User",
+    "email": "admin@sakinah.com",
+    "password": "password123",
+    "role": "admin",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+]

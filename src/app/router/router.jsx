@@ -1,11 +1,14 @@
 import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { DashboardLayout } from '../layouts/DashboardLayout';
+import { ProtectedRoute } from './ProtectedRoute';
 import { Box, CircularProgress } from '@mui/material';
 import { ErrorPage } from '../pages/ErrorPage';
 
 // Lazy Load Pages
 const LandingPage = lazy(() => import('../../features/landing/pages/LandingPage').then(module => ({ default: module.LandingPage })));
+const SignInPage = lazy(() => import('../../features/auth/pages/SignInPage').then(module => ({ default: module.SignInPage })));
+const SignUpPage = lazy(() => import('../../features/auth/pages/SignUpPage').then(module => ({ default: module.SignUpPage })));
 const PatientsListPage = lazy(() => import('../../features/patients/pages/PatientsListPage').then(module => ({ default: module.PatientsListPage })));
 const PatientCreateEditPage = lazy(() => import('../../features/patients/pages/PatientCreateEditPage').then(module => ({ default: module.PatientCreateEditPage })));
 const PatientDetailsPage = lazy(() => import('../../features/patients/pages/PatientDetailsPage').then(module => ({ default: module.PatientDetailsPage })));
@@ -30,8 +33,28 @@ export const router = createBrowserRouter([
                 ),
             },
             {
+                path: 'signin',
+                element: (
+                    <Suspense fallback={<Loading />}>
+                        <SignInPage />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'signup',
+                element: (
+                    <Suspense fallback={<Loading />}>
+                        <SignUpPage />
+                    </Suspense>
+                ),
+            },
+            {
                 path: 'dashboard',
-                element: <DashboardLayout />,
+                element: (
+                    <ProtectedRoute>
+                        <DashboardLayout />
+                    </ProtectedRoute>
+                ),
                 children: [
                     {
                         index: true,

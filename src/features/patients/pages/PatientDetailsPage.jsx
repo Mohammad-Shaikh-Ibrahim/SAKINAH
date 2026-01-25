@@ -65,7 +65,7 @@ export const PatientDetailsPage = () => {
     const handleDeleteConfirm = async () => {
         setIsConfirmOpen(false);
         await deleteMutation.mutateAsync(id);
-        navigate('/');
+        navigate('/dashboard');
     };
 
     const handleDeleteCancel = () => {
@@ -78,12 +78,12 @@ export const PatientDetailsPage = () => {
     return (
         <>
             <Helmet>
-                <title>{patient.firstName} {patient.lastName} | PMS</title>
+                <title>{patient.firstName} {patient.lastName} | SAKINAH</title>
             </Helmet>
 
             {/* Header */}
             <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-                <IconButton component={RouterLink} to="/">
+                <IconButton component={RouterLink} to="/dashboard">
                     <ArrowBackIcon />
                 </IconButton>
                 <Typography variant="h4" fontWeight="bold">
@@ -99,7 +99,7 @@ export const PatientDetailsPage = () => {
                         variant="outlined"
                         startIcon={<EditIcon />}
                         component={RouterLink}
-                        to={`/patients/${id}/edit`}
+                        to={`/dashboard/patients/${id}/edit`}
                     >
                         Edit
                     </Button>
