@@ -35,7 +35,7 @@ const Content = styled.div`
 const Headline = styled.h1`
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 800;
-  color: #333;
+  color: #1a3e72;
   margin-bottom: 24px;
   line-height: 1.1;
   
