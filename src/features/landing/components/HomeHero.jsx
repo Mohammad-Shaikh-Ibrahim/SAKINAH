@@ -68,20 +68,31 @@ const CTAWrapper = styled.div`
   flex-wrap: wrap;
 `;
 
+const scrollToSection = (sectionId) => {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
 export const HomeHero = ({ bgImage }) => {
     return (
         <HeroWrapper bgImage={bgImage}>
             <Overlay />
             <Content>
-                <Quote>“Ultimately, healing means bringing peace to our souls.”</Quote>
+                <Quote>"Ultimately, healing means bringing peace to our souls."</Quote>
                 <Headline>SAKINAH <span>Experience Peace in Care.</span></Headline>
                 <Paragraph>
                     A calm healthcare platform focused on compassionate care, peace, and patient well-being.
                     Dedicated to your health and peace of mind.
                 </Paragraph>
                 <CTAWrapper>
-                    <StyledButton variant="primary" size="large">About</StyledButton>
-                    <StyledButton variant="secondary" size="large">Contact Us</StyledButton>
+                    <StyledButton variant="primary" size="large" onClick={() => scrollToSection('about')}>
+                        About
+                    </StyledButton>
+                    <StyledButton variant="secondary" size="large" onClick={() => scrollToSection('contact')}>
+                        Contact Us
+                    </StyledButton>
                 </CTAWrapper>
             </Content>
         </HeroWrapper>

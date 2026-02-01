@@ -12,14 +12,13 @@ const NavContainer = styled.nav`
   left: 0;
   right: 0;
   height: 80px;
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 0 24px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 `;
 
 const NavContent = styled.div`
