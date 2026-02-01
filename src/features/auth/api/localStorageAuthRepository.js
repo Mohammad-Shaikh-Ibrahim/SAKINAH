@@ -1,75 +1,58 @@
-import seedUsers from './users.seed.json';
+import { usersRepository } from '../../users/api/LocalStorageUsersRepository';
+import { getRolePermissions } from '../../users/model/roles';
 
-const USERS_KEY = 'sakinah_users_db_v1';
 const SESSION_KEY = 'sakinah_session_v1';
 
-// Helper for simulating async API calls
-const delay = (ms = 800) => new Promise((resolve) => setTimeout(resolve, ms));
-
 class LocalStorageAuthRepository {
-    constructor() {
-        this._initDB();
-    }
-
-    _initDB() {
-        if (!localStorage.getItem(USERS_KEY)) {
-            localStorage.setItem(USERS_KEY, JSON.stringify(seedUsers));
-        }
-    }
-
-    _getUsers() {
-        const data = localStorage.getItem(USERS_KEY);
-        return data ? JSON.parse(data) : [];
-    }
-
-    _saveUsers(users) {
-        localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    }
-
     async login({ email, password }) {
-        await delay();
-        const users = this._getUsers();
-        const user = users.find(u => u.email === email && u.password === password);
-
-        if (!user) {
-            throw new Error('Invalid email or password');
-        }
-
-        const session = {
-            user: {
-                id: user.id,
-                fullName: user.fullName,
-                email: user.email,
-                role: user.role
-            },
-            token: `mock-jwt-token-${user.id}-${Date.now()}`,
-            expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
-        };
-
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-        return session;
+        // Delegate to users repository which handles authentication and audit logging
+        return await usersRepository.authenticate(email, password);
     }
 
     async register({ fullName, email, password }) {
-        await delay();
-        const users = this._getUsers();
+        // For public registration, create as doctor role by default
+        // In production, this might create a pending account or require admin approval
+        const USERS_KEY = 'sakinah_users_db_v2';
+        const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
-        if (users.find(u => u.email === email)) {
+        await delay();
+
+        const usersData = localStorage.getItem(USERS_KEY);
+        const users = usersData ? JSON.parse(usersData) : [];
+
+        if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
             throw new Error('Email already registered');
         }
 
         const newUser = {
-            id: `u-${Date.now()}`,
-            fullName,
-            email,
+            id: `user-${Date.now()}`,
+            email: email.toLowerCase(),
             password,
-            role: 'user',
-            createdAt: new Date().toISOString()
+            fullName,
+            role: 'doctor', // Default role for self-registration
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: null,
+            lastLogin: null,
+            profile: {
+                title: '',
+                specialization: '',
+                licenseNumber: '',
+                phone: '',
+                avatar: null,
+            },
+            settings: {
+                emailNotifications: true,
+                theme: 'light',
+                language: 'en',
+            },
         };
 
         users.push(newUser);
-        this._saveUsers(users);
+        localStorage.setItem(USERS_KEY, JSON.stringify(users));
 
+        // Log in the new user
         return this.login({ email, password });
     }
 
@@ -85,6 +68,11 @@ class LocalStorageAuthRepository {
         if (Date.now() > session.expiresAt) {
             localStorage.removeItem(SESSION_KEY);
             return null;
+        }
+
+        // Ensure permissions are included
+        if (session.user && !session.user.permissions) {
+            session.user.permissions = getRolePermissions(session.user.role);
         }
 
         return session;

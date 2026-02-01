@@ -1,10 +1,98 @@
 [
   {
-    "id": "u-1",
-    "fullName": "Admin User",
+    "id": "user-001",
     "email": "admin@sakinah.com",
-    "password": "password123",
+    "password": "Admin123!",
+    "fullName": "Dr. Sarah Administrator",
     "role": "admin",
-    "createdAt": "2024-01-01T00:00:00.000Z"
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "createdBy": null,
+    "lastLogin": null,
+    "profile": {
+      "title": "MD",
+      "specialization": "Internal Medicine",
+      "licenseNumber": "MED-001",
+      "phone": "+1234567890",
+      "avatar": null
+    },
+    "settings": {
+      "emailNotifications": true,
+      "theme": "light",
+      "language": "en"
+    }
+  },
+  {
+    "id": "user-002",
+    "email": "doctor@sakinah.com",
+    "password": "Doctor123!",
+    "fullName": "Dr. John Smith",
+    "role": "doctor",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "createdBy": "user-001",
+    "lastLogin": null,
+    "profile": {
+      "title": "MD",
+      "specialization": "Cardiology",
+      "licenseNumber": "MED-002",
+      "phone": "+1234567891",
+      "avatar": null
+    },
+    "settings": {
+      "emailNotifications": true,
+      "theme": "light",
+      "language": "en"
+    }
+  },
+  {
+    "id": "user-003",
+    "email": "nurse@sakinah.com",
+    "password": "Nurse123!",
+    "fullName": "Emily Johnson RN",
+    "role": "nurse",
+    "isActive": true,
+    "createdAt": "2026-01-10T00:00:00Z",
+    "updatedAt": "2026-01-10T00:00:00Z",
+    "createdBy": "user-001",
+    "lastLogin": null,
+    "profile": {
+      "title": "RN",
+      "specialization": "General Care",
+      "licenseNumber": "RN-001",
+      "phone": "+1234567892",
+      "avatar": null
+    },
+    "settings": {
+      "emailNotifications": true,
+      "theme": "light",
+      "language": "en"
+    }
+  },
+  {
+    "id": "user-004",
+    "email": "receptionist@sakinah.com",
+    "password": "Reception123!",
+    "fullName": "Maria Garcia",
+    "role": "receptionist",
+    "isActive": true,
+    "createdAt": "2026-01-10T00:00:00Z",
+    "updatedAt": "2026-01-10T00:00:00Z",
+    "createdBy": "user-001",
+    "lastLogin": null,
+    "profile": {
+      "title": "",
+      "specialization": "",
+      "licenseNumber": "",
+      "phone": "+1234567893",
+      "avatar": null
+    },
+    "settings": {
+      "emailNotifications": true,
+      "theme": "light",
+      "language": "en"
+    }
   }
 ]

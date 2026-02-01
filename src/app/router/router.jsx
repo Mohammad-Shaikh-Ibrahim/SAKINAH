@@ -19,6 +19,12 @@ const PrescriptionCreateEditPage = lazy(() => import('../../features/prescriptio
 const PrescriptionsListPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionsListPage').then(module => ({ default: module.PrescriptionsListPage })));
 const PrescriptionDetailsPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionDetailsPage').then(module => ({ default: module.PrescriptionDetailsPage })));
 
+// Users & Admin Pages
+const UserManagementPage = lazy(() => import('../../features/users/pages/UserManagementPage'));
+const MyProfilePage = lazy(() => import('../../features/users/pages/MyProfilePage'));
+const AuditLogsPage = lazy(() => import('../../features/users/pages/AuditLogsPage'));
+const AccessDeniedPage = lazy(() => import('../../features/users/pages/AccessDeniedPage'));
+
 const Loading = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
@@ -155,6 +161,46 @@ export const router = createBrowserRouter([
                         element: (
                             <Suspense fallback={<Loading />}>
                                 <AvailabilitySettingsPage />
+                            </Suspense>
+                        ),
+                    },
+                    // User Management (Admin only)
+                    {
+                        path: 'users',
+                        element: (
+                            <ProtectedRoute permission="users.read">
+                                <Suspense fallback={<Loading />}>
+                                    <UserManagementPage />
+                                </Suspense>
+                            </ProtectedRoute>
+                        ),
+                    },
+                    // Audit Logs (Admin only)
+                    {
+                        path: 'audit-logs',
+                        element: (
+                            <ProtectedRoute permission="audit.read">
+                                <Suspense fallback={<Loading />}>
+                                    <AuditLogsPage />
+                                </Suspense>
+                            </ProtectedRoute>
+                        ),
+                    },
+                    // User Profile (All authenticated users)
+                    {
+                        path: 'profile',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <MyProfilePage />
+                            </Suspense>
+                        ),
+                    },
+                    // Access Denied Page
+                    {
+                        path: 'access-denied',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <AccessDeniedPage />
                             </Suspense>
                         ),
                     },

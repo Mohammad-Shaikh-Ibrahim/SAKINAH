@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectCurrentUser } from '../../features/auth/store/authSlice';
@@ -12,11 +12,24 @@ import {
     IconButton,
     useTheme,
     useMediaQuery,
+    Drawer,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    Divider,
+    Menu,
+    MenuItem,
+    Avatar,
+    Chip,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu'; // Ensure @mui/icons-material is installed
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PersonIcon from '@mui/icons-material/Person';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ConfirmModal } from '../../shared/ui/ConfirmModal';
+import { usePermissions } from '../../features/users/hooks/usePermissions';
+import { ROLE_COLORS } from '../../features/users/model/roles';
 
 export const DashboardLayout = () => {
     const dispatch = useDispatch();
@@ -24,10 +37,19 @@ export const DashboardLayout = () => {
     const user = useSelector(selectCurrentUser);
     const location = useLocation();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [userMenuAnchor, setUserMenuAnchor] = useState(null);
+
+    const { hasPermission, isAdmin, userRole } = usePermissions();
+
+    const handleDrawerToggle = () => {
+        setMobileOpen(!mobileOpen);
+    };
 
     const handleLogoutClick = () => {
+        setUserMenuAnchor(null);
         setIsLogoutOpen(true);
     };
 
@@ -41,13 +63,49 @@ export const DashboardLayout = () => {
         setIsLogoutOpen(false);
     };
 
-    const navItems = [
-        { label: 'Dashboard', path: '/dashboard' },
-        { label: 'Patients', path: '/dashboard/patients' },
-        { label: 'Appointments', path: '/dashboard/appointments' },
-        { label: 'Prescriptions', path: '/dashboard/prescriptions' }, // Placeholder route, mainly for list
-        // Future: Reports
-    ];
+    const handleUserMenuOpen = (event) => {
+        setUserMenuAnchor(event.currentTarget);
+    };
+
+    const handleUserMenuClose = () => {
+        setUserMenuAnchor(null);
+    };
+
+    const handleProfileClick = () => {
+        setUserMenuAnchor(null);
+        navigate('/dashboard/profile');
+    };
+
+    // Build navigation items based on permissions
+    const navItems = useMemo(() => {
+        const items = [
+            { label: 'Dashboard', path: '/dashboard', permission: null },
+        ];
+
+        if (hasPermission('patients.read')) {
+            items.push({ label: 'Patients', path: '/dashboard/patients', permission: 'patients.read' });
+        }
+
+        if (hasPermission('appointments.read')) {
+            items.push({ label: 'Appointments', path: '/dashboard/appointments', permission: 'appointments.read' });
+        }
+
+        if (hasPermission('prescriptions.read')) {
+            items.push({ label: 'Prescriptions', path: '/dashboard/prescriptions', permission: 'prescriptions.read' });
+        }
+
+        if (hasPermission('users.read')) {
+            items.push({ label: 'Users', path: '/dashboard/users', permission: 'users.read' });
+        }
+
+        if (hasPermission('audit.read')) {
+            items.push({ label: 'Audit Logs', path: '/dashboard/audit-logs', permission: 'audit.read' });
+        }
+
+        return items;
+    }, [hasPermission]);
+
+    const roleColors = ROLE_COLORS[userRole] || { bg: '#e0e0e0', color: '#616161' };
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -84,13 +142,12 @@ export const DashboardLayout = () => {
                             </Typography>
                         </Box>
 
-                        {/* Mobile Menu Placeholder */}
+                        {/* Mobile Menu Button */}
                         <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                             <IconButton
                                 size="large"
-                                aria-label="menu"
-                                aria-controls="menu-appbar"
-                                aria-haspopup="true"
+                                aria-label="open navigation menu"
+                                onClick={handleDrawerToggle}
                                 color="inherit"
                             >
                                 <MenuIcon />
@@ -98,45 +155,178 @@ export const DashboardLayout = () => {
                         </Box>
 
                         {/* Desktop Nav */}
-                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-                            {navItems.map((item) => (
-                                <Button
-                                    key={item.path}
-                                    component={RouterLink}
-                                    to={item.path}
-                                    sx={{
-                                        my: 2,
-                                        color: location.pathname === item.path ? 'primary.main' : 'text.secondary',
-                                        fontWeight: location.pathname === item.path ? 700 : 500,
-                                        bgcolor: location.pathname === item.path ? 'action.hover' : 'transparent',
-                                        '&:hover': {
-                                            bgcolor: 'action.hover',
-                                            color: 'primary.main',
-                                        },
-                                    }}
-                                >
-                                    {item.label}
-                                </Button>
-                            ))}
+                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+                            {navItems.map((item) => {
+                                const isActive = location.pathname === item.path ||
+                                    (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+                                return (
+                                    <Button
+                                        key={item.path}
+                                        component={RouterLink}
+                                        to={item.path}
+                                        size="small"
+                                        sx={{
+                                            color: isActive ? 'primary.main' : 'text.secondary',
+                                            fontWeight: isActive ? 600 : 500,
+                                            bgcolor: isActive ? 'action.selected' : 'transparent',
+                                            '&:hover': {
+                                                bgcolor: 'action.hover',
+                                                color: 'primary.main',
+                                            },
+                                        }}
+                                    >
+                                        {item.label}
+                                    </Button>
+                                );
+                            })}
                         </Box>
 
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                                {user?.fullName}
-                            </Typography>
+                        {/* User Menu */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Button
-                                variant="outlined"
-                                color="error"
-                                size="small"
-                                startIcon={<LogoutIcon />}
-                                onClick={handleLogoutClick}
+                                onClick={handleUserMenuOpen}
+                                sx={{
+                                    textTransform: 'none',
+                                    color: 'text.primary',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                }}
+                                endIcon={<ExpandMoreIcon />}
                             >
-                                Logout
+                                <Avatar
+                                    sx={{
+                                        width: 32,
+                                        height: 32,
+                                        bgcolor: 'primary.main',
+                                        fontSize: '0.875rem',
+                                    }}
+                                >
+                                    {user?.fullName?.charAt(0)}
+                                </Avatar>
+                                <Box sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'left' }}>
+                                    <Typography variant="body2" sx={{ lineHeight: 1.2 }}>
+                                        {user?.fullName}
+                                    </Typography>
+                                    <Chip
+                                        label={userRole}
+                                        size="small"
+                                        sx={{
+                                            height: 18,
+                                            fontSize: '0.65rem',
+                                            bgcolor: roleColors.bg,
+                                            color: roleColors.color,
+                                            textTransform: 'capitalize',
+                                        }}
+                                    />
+                                </Box>
                             </Button>
+                            <Menu
+                                anchorEl={userMenuAnchor}
+                                open={Boolean(userMenuAnchor)}
+                                onClose={handleUserMenuClose}
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                            >
+                                <MenuItem onClick={handleProfileClick}>
+                                    <PersonIcon sx={{ mr: 1 }} fontSize="small" />
+                                    My Profile
+                                </MenuItem>
+                                <Divider />
+                                <MenuItem onClick={handleLogoutClick} sx={{ color: 'error.main' }}>
+                                    <LogoutIcon sx={{ mr: 1 }} fontSize="small" />
+                                    Logout
+                                </MenuItem>
+                            </Menu>
                         </Box>
                     </Toolbar>
                 </Container>
             </AppBar>
+
+            {/* Mobile Drawer */}
+            <Drawer
+                variant="temporary"
+                open={mobileOpen}
+                onClose={handleDrawerToggle}
+                ModalProps={{ keepMounted: true }}
+                sx={{
+                    display: { xs: 'block', md: 'none' },
+                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 280 },
+                }}
+            >
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                    <img
+                        src={`${import.meta.env.BASE_URL}logo.png`}
+                        alt="SAKINAH"
+                        style={{ height: '48px' }}
+                    />
+                    <Typography variant="h6" sx={{ fontWeight: 700, mt: 1 }}>
+                        SAKINAH
+                    </Typography>
+                </Box>
+                <Divider />
+                <Box sx={{ px: 2, py: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                            {user?.fullName?.charAt(0)}
+                        </Avatar>
+                        <Box>
+                            <Typography variant="body2" fontWeight={600}>
+                                {user?.fullName}
+                            </Typography>
+                            <Chip
+                                label={userRole}
+                                size="small"
+                                sx={{
+                                    height: 20,
+                                    fontSize: '0.7rem',
+                                    bgcolor: roleColors.bg,
+                                    color: roleColors.color,
+                                    textTransform: 'capitalize',
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                </Box>
+                <Divider />
+                <List>
+                    {navItems.map((item) => {
+                        const isActive = location.pathname === item.path ||
+                            (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+                        return (
+                            <ListItem key={item.path} disablePadding>
+                                <ListItemButton
+                                    component={RouterLink}
+                                    to={item.path}
+                                    selected={isActive}
+                                    onClick={handleDrawerToggle}
+                                >
+                                    <ListItemText primary={item.label} />
+                                </ListItemButton>
+                            </ListItem>
+                        );
+                    })}
+                </List>
+                <Divider />
+                <List>
+                    <ListItem disablePadding>
+                        <ListItemButton
+                            component={RouterLink}
+                            to="/dashboard/profile"
+                            onClick={handleDrawerToggle}
+                        >
+                            <PersonIcon sx={{ mr: 2 }} />
+                            <ListItemText primary="My Profile" />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton onClick={handleLogoutClick} sx={{ color: 'error.main' }}>
+                            <LogoutIcon sx={{ mr: 2 }} />
+                            <ListItemText primary="Logout" />
+                        </ListItemButton>
+                    </ListItem>
+                </List>
+            </Drawer>
 
             <Container component="main" maxWidth="xl" sx={{ flexGrow: 1, py: { xs: 4, print: 0 }, px: { xs: 2, print: 0 } }}>
                 <Outlet />

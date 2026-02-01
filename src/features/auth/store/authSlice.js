@@ -96,5 +96,7 @@ export const { logout, initializeAuth, clearError } = authSlice.actions;
 export const selectAuth = (state) => state.auth;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectCurrentUser = (state) => state.auth.user;
+export const selectUserRole = (state) => state.auth.user?.role;
+export const selectUserPermissions = (state) => state.auth.user?.permissions || [];
 
 export default authSlice.reducer;
