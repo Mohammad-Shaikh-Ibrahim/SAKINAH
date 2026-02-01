@@ -1,38 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Autocomplete, TextField, CircularProgress, Box, Typography, Chip } from '@mui/material';
 import { useMedicationSearch } from '../hooks/usePrescriptions';
 import ScienceIcon from '@mui/icons-material/Science';
 
-export const MedicationSearch = ({ onSelect, error, helperText }) => {
-    const [inputValue, setInputValue] = useState('');
-    const [options, setOptions] = useState([]);
+export const MedicationSearch = ({ value, onSelect, error, helperText }) => {
+    const [inputValue, setInputValue] = useState(value || '');
+
+    useEffect(() => {
+        setInputValue(value || '');
+    }, [value]);
 
     const { data: searchResults = [], isLoading } = useMedicationSearch(inputValue);
 
     return (
         <Autocomplete
             fullWidth
-            getOptionLabel={(option) => option ? `${option.brandName} (${option.genericName})` : ''}
-            filterOptions={(x) => x} // Disable client-side filtering as we rely on hook results
+            getOptionLabel={(option) => {
+                if (typeof option === 'string') return option;
+                return option ? `${option.brandName} (${option.genericName})` : '';
+            }}
+            filterOptions={(x) => x}
             options={searchResults}
             autoComplete
             includeInputInList
             filterSelectedOptions
+            freeSolo
+            forcePopupIcon={false}
+            inputValue={inputValue}
             value={null}
-            noOptionsText="Type to search medications..."
             onChange={(event, newValue) => {
-                if (newValue) {
+                if (typeof newValue === 'string') {
+                    onSelect({
+                        brandName: newValue,
+                        genericName: newValue,
+                        category: 'Custom',
+                        commonForms: ['tablet'],
+                        commonDosages: [''],
+                        commonInstructions: ''
+                    });
+                    setInputValue(newValue);
+                } else if (newValue && typeof newValue === 'object') {
                     onSelect(newValue);
-                    setInputValue(''); // Reset after selection to clear search
+                    setInputValue(newValue.brandName);
                 }
             }}
             onInputChange={(event, newInputValue) => {
                 setInputValue(newInputValue);
             }}
+            onBlur={() => {
+                // Capture typed text when user leaves field without selecting from dropdown
+                if (inputValue && inputValue.trim()) {
+                    onSelect({
+                        brandName: inputValue.trim(),
+                        genericName: inputValue.trim(),
+                        category: 'Custom',
+                        commonForms: ['tablet'],
+                        commonDosages: [''],
+                        commonInstructions: ''
+                    });
+                }
+            }}
             renderInput={(params) => (
                 <TextField
                     {...params}
-                    label="Search Medication (Brand or Generic)"
+                    label="Medication (Brand or Generic)"
                     error={error}
                     helperText={helperText}
                     InputProps={{

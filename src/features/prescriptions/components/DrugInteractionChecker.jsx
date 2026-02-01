@@ -7,7 +7,7 @@ import { prescriptionsRepository } from '../api/LocalStoragePrescriptionsReposit
 
 export const DrugInteractionChecker = ({ currentMedications = [], patientId }) => {
     const [interactions, setInteractions] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const checkInteractions = async () => {
@@ -16,7 +16,7 @@ export const DrugInteractionChecker = ({ currentMedications = [], patientId }) =
                 return;
             }
 
-            setLoading(true);
+            setIsLoading(true);
             try {
                 const medNames = (currentMedications || [])
                     .map(m => m?.genericName || m?.medicationName)
@@ -32,7 +32,7 @@ export const DrugInteractionChecker = ({ currentMedications = [], patientId }) =
             } catch (error) {
                 console.error("Failed to check interactions", error);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
 
@@ -41,10 +41,15 @@ export const DrugInteractionChecker = ({ currentMedications = [], patientId }) =
         return () => clearTimeout(timeout);
     }, [currentMedications, patientId]);
 
-    if (interactions.length === 0) return null;
+    if (interactions.length === 0 && !isLoading) return null;
 
     return (
         <Box sx={{ mt: 2, mb: 2 }}>
+            {isLoading && (
+                <Alert severity="info" sx={{ mb: 1 }}>
+                    Checking for drug interactions...
+                </Alert>
+            )}
             {interactions.map((interaction) => (
                 <Alert
                     key={interaction.id}

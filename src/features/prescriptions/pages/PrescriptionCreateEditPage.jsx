@@ -8,11 +8,12 @@ import { useCreatePrescription } from '../hooks/usePrescriptions';
 import { usePatient } from '../../patients/api/usePatients';
 
 export const PrescriptionCreateEditPage = () => {
-    const { patientId } = useParams();
+    const { patientId: routePatientId } = useParams();
+    const patientId = (routePatientId && routePatientId !== 'undefined' && routePatientId !== 'null') ? routePatientId : null;
     const navigate = useNavigate();
     const createMutation = useCreatePrescription();
 
-    // Fetch patient info
+    // Fetch patient info (only if patientId exists)
     const { data: patient, isLoading: isPatientLoading, isError } = usePatient(patientId);
 
     const handleSubmit = async (data) => {
@@ -34,6 +35,7 @@ export const PrescriptionCreateEditPage = () => {
         }
     };
 
+    // Only show loading state if we're actually fetching a patient
     if (patientId && isPatientLoading) {
         return (
             <Container maxWidth="xl" sx={{ mt: 4 }}>
@@ -46,7 +48,8 @@ export const PrescriptionCreateEditPage = () => {
         );
     }
 
-    if (patientId && (isError || !patient)) {
+    // Only show error if we tried to fetch a specific patient and it failed
+    if (patientId && !isPatientLoading && (isError || !patient)) {
         return (
             <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <Alert severity="error">Patient not found or failed to load. Please return to patients list.</Alert>
@@ -80,14 +83,14 @@ export const PrescriptionCreateEditPage = () => {
                     {patient && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 5 }}>
                             <Avatar sx={{ width: 32, height: 32, bgcolor: '#2D9596', fontSize: '0.875rem' }}>
-                                {(patient.firstName || '').charAt(0)}{(patient.lastName || '').charAt(0)}
+                                {String(patient.firstName || '').charAt(0)}{String(patient.lastName || '').charAt(0)}
                             </Avatar>
                             <Box>
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
-                                    {patient.firstName} {patient.lastName}
+                                    {String(patient.firstName || '')} {String(patient.lastName || '')}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                                    ID: {String(patient.id || '').slice(0, 8)} • DOB: {patient.dob}
+                                    ID: {String(patient.id || '').slice(0, 8)} • DOB: {String(patient.dob || 'N/A')}
                                 </Typography>
                             </Box>
                         </Box>

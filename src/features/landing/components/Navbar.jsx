@@ -96,12 +96,12 @@ export const Navbar = () => {
             </>
           ) : (
             <>
-              <Typography variant="body2" sx={{ alignSelf: 'center', mr: 2, color: '#2D9596', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
-                Hi, {user?.fullName?.split(' ')[0]}
-              </Typography>
               <StyledButton variant="secondary" as={RouterLink} to="/dashboard">
                 Dashboard
               </StyledButton>
+              <Typography variant="body2" sx={{ alignSelf: 'center', color: '#2D9596', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
+                Hi, {user?.fullName?.split(' ')[0]}
+              </Typography>
               <StyledButton variant="ghost" onClick={() => dispatch(logout())}>
                 Logout
               </StyledButton>

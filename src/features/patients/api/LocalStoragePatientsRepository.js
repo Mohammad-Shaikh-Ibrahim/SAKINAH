@@ -22,8 +22,14 @@ class LocalStoragePatientsRepository {
     }
 
     _getAll() {
-        const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : [];
+        try {
+            const data = localStorage.getItem(STORAGE_KEY);
+            const parsed = data ? JSON.parse(data) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            console.error('Error parsing patients db', e);
+            return [];
+        }
     }
 
     _save(data) {
@@ -36,22 +42,26 @@ class LocalStoragePatientsRepository {
 
         // Filter by owner
         if (userId) {
-            patients = patients.filter(p => p.createdBy === userId);
+            patients = patients.filter(p => p && p.createdBy === userId);
         }
 
         // Filter
         if (search) {
             const lowerSearch = search.toLowerCase();
             patients = patients.filter(
-                (p) =>
-                    p.firstName.toLowerCase().includes(lowerSearch) ||
-                    p.lastName.toLowerCase().includes(lowerSearch) ||
-                    p.phone.includes(search)
+                (p) => {
+                    if (!p) return false;
+                    const fName = String(p.firstName || '').toLowerCase();
+                    const lName = String(p.lastName || '').toLowerCase();
+                    const phone = String(p.phone || '');
+                    return fName.includes(lowerSearch) || lName.includes(lowerSearch) || phone.includes(search);
+                }
             );
         }
 
         // Sort (by createdAt default)
         patients.sort((a, b) => {
+            if (!a || !b) return 0;
             const dateA = new Date(a.createdAt || 0);
             const dateB = new Date(b.createdAt || 0);
             return sort === 'asc' ? dateA - dateB : dateB - dateA; // Descending default

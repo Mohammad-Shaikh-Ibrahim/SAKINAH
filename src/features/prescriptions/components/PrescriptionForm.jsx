@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import {
     Box,
     Paper,
-    Grid,
     Typography,
     Button,
     IconButton,
@@ -11,13 +10,13 @@ import {
     Divider,
     Card,
     CardContent,
-    CardHeader
+    CardHeader,
+    Avatar,
+    CircularProgress
 } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
-import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import { ControlledTextField } from '../../../shared/ui/ControlledTextField';
 import { FormGrid, FormFieldWrapper } from '../../../shared/ui/FormLayouts';
 import { MedicationSearch } from './MedicationSearch';
@@ -37,7 +36,7 @@ export const PrescriptionForm = ({
     patientId: initialPatientId,
     onCancel
 }) => {
-    const { control, handleSubmit, watch, setValue, register, formState: { errors } } = useForm({
+    const { control, handleSubmit, watch, setValue, register } = useForm({
         defaultValues: defaultValues || {
             patientId: initialPatientId || '',
             prescriptionDate: new Date().toISOString().split('T')[0],
@@ -94,7 +93,7 @@ export const PrescriptionForm = ({
                         name="patientId"
                         control={control}
                         rules={{ required: 'You must select a patient' }}
-                        render={({ field, fieldState: { error } }) => (
+                        render={({ fieldState: { error } }) => (
                             <PatientSearch
                                 onSelect={handlePatientSelect}
                                 error={!!error}
@@ -105,8 +104,8 @@ export const PrescriptionForm = ({
                     {selectedPatient && (
                         <Box sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid #ffe0b2', display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Avatar sx={{ bgcolor: '#2D9596' }}>
-                                {(selectedPatient.firstName || '').charAt(0)}
-                                {(selectedPatient.lastName || '').charAt(0)}
+                                {String(selectedPatient.firstName || '').charAt(0)}
+                                {String(selectedPatient.lastName || '').charAt(0)}
                             </Avatar>
                             <Box>
                                 <Typography variant="subtitle1" fontWeight="bold">
@@ -335,16 +334,16 @@ export const PrescriptionForm = ({
                 <Button variant="outlined" color="inherit" onClick={onCancel} size="large">
                     Cancel
                 </Button>
-                <LoadingButton
+                <Button
                     type="submit"
                     variant="contained"
-                    loading={isSubmitting}
-                    startIcon={<SaveIcon />}
+                    disabled={isSubmitting}
+                    startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
                     size="large"
                     sx={{ bgcolor: '#2D9596', '&:hover': { bgcolor: '#267D7E' }, px: 4 }}
                 >
-                    Save Prescription
-                </LoadingButton>
+                    {isSubmitting ? 'Saving...' : 'Save Prescription'}
+                </Button>
             </Box>
         </form>
     );

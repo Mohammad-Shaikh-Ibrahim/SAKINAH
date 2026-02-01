@@ -8,7 +8,7 @@ const safeFormatDate = (dateStr, formatStr = 'MMMM dd, yyyy') => {
         const date = new Date(dateStr);
         if (isNaN(date.getTime())) return dateStr || 'N/A';
         return format(date, formatStr);
-    } catch (error) {
+    } catch {
         return dateStr || 'N/A';
     }
 };

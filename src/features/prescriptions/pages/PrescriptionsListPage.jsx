@@ -12,7 +12,8 @@ export const PrescriptionsListPage = () => {
     // This page could be global or per-patient. 
     // If accessed via /dashboard/patients/:id/prescriptions, we filter.
     const { patientId: routePatientId, id: routeId } = useParams();
-    const patientId = routePatientId || routeId;
+    const rawPatientId = routePatientId || routeId;
+    const patientId = (rawPatientId && rawPatientId !== 'undefined' && rawPatientId !== 'null') ? rawPatientId : null;
 
     // For MVP, let's assume this page is only used WITHIN patient details for now, 
     // OR we list ALL if no patientId (not implemented in repo yet).
