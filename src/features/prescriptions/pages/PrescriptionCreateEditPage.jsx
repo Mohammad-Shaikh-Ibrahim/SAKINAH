@@ -17,18 +17,24 @@ export const PrescriptionCreateEditPage = () => {
 
     const handleSubmit = async (data) => {
         try {
-            await createMutation.mutateAsync({
+            const finalPatientId = patientId || data.patientId;
+            if (!finalPatientId) {
+                console.error("No patient selected");
+                return;
+            }
+
+            const response = await createMutation.mutateAsync({
                 ...data,
-                patientId,
+                patientId: finalPatientId,
                 doctorId: 'current-user-id' // TODO: Get from Auth
             });
-            navigate(`/dashboard/patients/${patientId}`);
+            navigate(`/dashboard/prescriptions/${response.id}`);
         } catch (error) {
             console.error(error);
         }
     };
 
-    if (isPatientLoading) {
+    if (patientId && isPatientLoading) {
         return (
             <Container maxWidth="xl" sx={{ mt: 4 }}>
                 <Box sx={{ mb: 4 }}>
@@ -40,7 +46,7 @@ export const PrescriptionCreateEditPage = () => {
         );
     }
 
-    if (isError || !patient) {
+    if (patientId && (isError || !patient)) {
         return (
             <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <Alert severity="error">Patient not found or failed to load. Please return to patients list.</Alert>
@@ -71,19 +77,21 @@ export const PrescriptionCreateEditPage = () => {
                         <Typography variant="h4" fontWeight="bold" color="primary">New Prescription</Typography>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 5 }}>
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: '#2D9596', fontSize: '0.875rem' }}>
-                            {patient.firstName?.charAt(0)}{patient.lastName?.charAt(0)}
-                        </Avatar>
-                        <Box>
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
-                                {patient.firstName} {patient.lastName}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                                ID: {patient.id?.slice(0, 8)} • DOB: {patient.dob}
-                            </Typography>
+                    {patient && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 5 }}>
+                            <Avatar sx={{ width: 32, height: 32, bgcolor: '#2D9596', fontSize: '0.875rem' }}>
+                                {(patient.firstName || '').charAt(0)}{(patient.lastName || '').charAt(0)}
+                            </Avatar>
+                            <Box>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+                                    {patient.firstName} {patient.lastName}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                    ID: {String(patient.id || '').slice(0, 8)} • DOB: {patient.dob}
+                                </Typography>
+                            </Box>
                         </Box>
-                    </Box>
+                    )}
                 </Box>
             </Box>
 

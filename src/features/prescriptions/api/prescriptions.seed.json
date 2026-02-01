@@ -2,7 +2,7 @@
   "prescriptions": [
     {
       "id": "rx-001",
-      "patientId": "patient-001",
+      "patientId": "p-101",
       "doctorId": "user-001",
       "prescriptionDate": "2026-01-20",
       "medications": [

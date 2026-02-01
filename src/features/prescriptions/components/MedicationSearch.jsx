@@ -12,7 +12,7 @@ export const MedicationSearch = ({ onSelect, error, helperText }) => {
     return (
         <Autocomplete
             fullWidth
-            getOptionLabel={(option) => `${option.brandName} (${option.genericName})`}
+            getOptionLabel={(option) => option ? `${option.brandName} (${option.genericName})` : ''}
             filterOptions={(x) => x} // Disable client-side filtering as we rely on hook results
             options={searchResults}
             autoComplete

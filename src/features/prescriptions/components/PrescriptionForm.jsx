@@ -23,6 +23,7 @@ import { FormGrid, FormFieldWrapper } from '../../../shared/ui/FormLayouts';
 import { MedicationSearch } from './MedicationSearch';
 import { DrugInteractionChecker } from './DrugInteractionChecker';
 import { AllergyAlert } from './AllergyAlert';
+import { PatientSearch } from './PatientSearch';
 
 // Reusable array of medication forms
 const FORMS = ['tablet', 'capsule', 'syrup', 'injection', 'cream', 'inhaler', 'drops', 'other'];
@@ -33,11 +34,12 @@ export const PrescriptionForm = ({
     defaultValues,
     onSubmit,
     isSubmitting,
-    patientId,
+    patientId: initialPatientId,
     onCancel
 }) => {
-    const { control, handleSubmit, watch, setValue, register } = useForm({
+    const { control, handleSubmit, watch, setValue, register, formState: { errors } } = useForm({
         defaultValues: defaultValues || {
+            patientId: initialPatientId || '',
             prescriptionDate: new Date().toISOString().split('T')[0],
             diagnosis: '',
             notes: '',
@@ -57,6 +59,9 @@ export const PrescriptionForm = ({
         }
     });
 
+    const currentPatientId = watch('patientId');
+    const [selectedPatient, setSelectedPatient] = React.useState(null);
+
     const { fields, append, remove } = useFieldArray({
         control,
         name: "medications"
@@ -64,9 +69,15 @@ export const PrescriptionForm = ({
 
     const watchedMedications = watch('medications');
 
+    const handlePatientSelect = (patient) => {
+        setSelectedPatient(patient);
+        setValue('patientId', patient?.id || '', { shouldValidate: true });
+    };
+
     const handleMedicationSelect = (index, med) => {
-        setValue(`medications.${index}.medicationName`, med.brandName);
-        setValue(`medications.${index}.genericName`, med.genericName);
+        if (!med) return;
+        setValue(`medications.${index}.medicationName`, med.brandName || '');
+        setValue(`medications.${index}.genericName`, med.genericName || '');
         setValue(`medications.${index}.form`, med.commonForms?.[0] || 'tablet');
         setValue(`medications.${index}.dosage`, med.commonDosages?.[0] || '');
         setValue(`medications.${index}.instructions`, med.commonInstructions || '');
@@ -74,6 +85,42 @@ export const PrescriptionForm = ({
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Card 0: Patient Selection (Only if not provided) */}
+            {!initialPatientId && (
+                <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0', borderRadius: 2, bgcolor: '#fff4e5' }}>
+                    <Typography variant="h6" gutterBottom color="warning.main" fontWeight="bold">Patient Selection</Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    <Controller
+                        name="patientId"
+                        control={control}
+                        rules={{ required: 'You must select a patient' }}
+                        render={({ field, fieldState: { error } }) => (
+                            <PatientSearch
+                                onSelect={handlePatientSelect}
+                                error={!!error}
+                                helperText={error?.message}
+                            />
+                        )}
+                    />
+                    {selectedPatient && (
+                        <Box sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid #ffe0b2', display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: '#2D9596' }}>
+                                {(selectedPatient.firstName || '').charAt(0)}
+                                {(selectedPatient.lastName || '').charAt(0)}
+                            </Avatar>
+                            <Box>
+                                <Typography variant="subtitle1" fontWeight="bold">
+                                    {String(selectedPatient.firstName || '')} {String(selectedPatient.lastName || '')}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    ID: {String(selectedPatient.id || '').slice(0, 8)} • DOB: {String(selectedPatient.dob || 'N/A')}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    )}
+                </Paper>
+            )}
+
             {/* Card 1: Clinical Details */}
             <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0', borderRadius: 2 }}>
                 <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">Clinical Details</Typography>
@@ -105,7 +152,7 @@ export const PrescriptionForm = ({
             {/* Interaction Check for ENTIRE list */}
             <DrugInteractionChecker
                 currentMedications={watchedMedications}
-                patientId={patientId}
+                patientId={currentPatientId}
             />
 
             {/* Card 2: Medications */}
@@ -157,8 +204,8 @@ export const PrescriptionForm = ({
                                             </Typography>
                                         )}
                                         <AllergyAlert
-                                            medicationName={watchedMedications[index]?.genericName || watchedMedications[index]?.medicationName}
-                                            patientId={patientId}
+                                            medicationName={(watchedMedications && watchedMedications[index]) ? (watchedMedications[index].genericName || watchedMedications[index].medicationName) : ''}
+                                            patientId={currentPatientId}
                                         />
                                     </FormFieldWrapper>
 

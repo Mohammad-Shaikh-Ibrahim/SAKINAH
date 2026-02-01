@@ -30,4 +30,14 @@ export const GlobalStyles = createGlobalStyle`
   button {
     font-family: inherit;
   }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    body {
+      background-color: white !important;
+    }
+  }
 `;

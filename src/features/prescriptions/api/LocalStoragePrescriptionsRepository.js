@@ -31,7 +31,13 @@ class LocalStoragePrescriptionsRepository {
 
     // --- Helpers ---
     _getPrescriptions() {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY_PRESCRIPTIONS) || '[]');
+        try {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_PRESCRIPTIONS) || '[]');
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error('Error parsing prescriptions', e);
+            return [];
+        }
     }
 
     _savePrescriptions(prescriptions) {
@@ -39,15 +45,33 @@ class LocalStoragePrescriptionsRepository {
     }
 
     _getMedications() {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY_MEDICATIONS) || '[]');
+        try {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_MEDICATIONS) || '[]');
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error('Error parsing medications', e);
+            return [];
+        }
     }
 
     _getInteractions() {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY_INTERACTIONS) || '[]');
+        try {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_INTERACTIONS) || '[]');
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error('Error parsing interactions', e);
+            return [];
+        }
     }
 
     _getAllergies() {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY_ALLERGIES) || '[]');
+        try {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_ALLERGIES) || '[]');
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error('Error parsing allergies', e);
+            return [];
+        }
     }
 
     _saveAllergies(allergies) {
@@ -77,9 +101,11 @@ class LocalStoragePrescriptionsRepository {
         // Extract all active medications from these prescriptions
         // We want a flat list of medications
         const activeMeds = [];
-        patientPrescriptions.forEach(prescription => {
+        (patientPrescriptions || []).forEach(prescription => {
+            if (!prescription || !Array.isArray(prescription.medications)) return;
+
             prescription.medications.forEach(med => {
-                if (med.status === 'active') {
+                if (med && med.status === 'active') {
                     activeMeds.push({
                         ...med,
                         prescriptionId: prescription.id,
@@ -192,26 +218,32 @@ class LocalStoragePrescriptionsRepository {
     // Check conflicts between NEW medications and EXISTING ACTIVE medications
     async checkDrugInteractions(newMedicationNames, patientId) {
         await delay(300);
-        const interactions = this._getInteractions();
-        const activeMeds = await this.getActivePrescriptionsByPatient(patientId);
+        const interactionsArr = this._getInteractions();
+        const interactionsList = Array.isArray(interactionsArr) ? interactionsArr : [];
 
-        const existingNames = activeMeds.map(m => m.genericName);
-        // Also check conflicts within the NEW list itself
-        const allToCheck = [...new Set([...existingNames, ...newMedicationNames])];
+        const activeMeds = await this.getActivePrescriptionsByPatient(patientId);
+        const existingNames = (activeMeds || []).map(m => m.genericName).filter(Boolean);
+
+        const allToCheck = [...new Set([...existingNames, ...(newMedicationNames || [])])]
+            .filter(name => !!name && typeof name === 'string');
 
         const foundInteractions = [];
 
         // N^2 check (simple for MVP)
         for (let i = 0; i < allToCheck.length; i++) {
             for (let j = i + 1; j < allToCheck.length; j++) {
-                const med1 = allToCheck[i];
-                const med2 = allToCheck[j];
+                const med1 = String(allToCheck[i] || '').toLowerCase();
+                const med2 = String(allToCheck[j] || '').toLowerCase();
+
+                if (!med1 || !med2) continue;
 
                 // Check bi-directional
-                const interaction = interactions.find(int =>
-                    (int.medication1.toLowerCase() === med1.toLowerCase() && int.medication2.toLowerCase() === med2.toLowerCase()) ||
-                    (int.medication1.toLowerCase() === med2.toLowerCase() && int.medication2.toLowerCase() === med1.toLowerCase())
-                );
+                const interaction = interactionsList.find(int => {
+                    if (!int || !int.medication1 || !int.medication2) return false;
+                    const i1 = String(int.medication1).toLowerCase();
+                    const i2 = String(int.medication2).toLowerCase();
+                    return (i1 === med1 && i2 === med2) || (i1 === med2 && i2 === med1);
+                });
 
                 if (interaction) {
                     foundInteractions.push(interaction);
@@ -223,20 +255,19 @@ class LocalStoragePrescriptionsRepository {
     }
 
     async checkAllergies(medicationName, patientId) {
+        if (!medicationName || !patientId) return null;
         await delay(300);
         const patientAllergies = await this.getPatientAllergies(patientId);
 
-        // Very basic check: does allergen string appear in medication name?
-        // In real app, we'd map ingredients or classes.
-        // For MVP, if allergy is "Penicillin" and med is "Amoxil (Amoxicillin)", we won't catch it unless logic knows Amoxil is Penicillin class.
-        // Let's rely on simple string matching against Generic Name for now or explicit exact matches.
+        if (!Array.isArray(patientAllergies)) return null;
 
-        const allergy = patientAllergies.find(a =>
-            a.isActive && (
-                medicationName.toLowerCase().includes(a.allergen.toLowerCase()) ||
-                a.allergen.toLowerCase().includes(medicationName.toLowerCase())
-            )
-        );
+        const searchName = String(medicationName).toLowerCase();
+
+        const allergy = patientAllergies.find(a => {
+            if (!a || !a.isActive || !a.allergen) return false;
+            const allergen = String(a.allergen).toLowerCase();
+            return searchName.includes(allergen) || allergen.includes(searchName);
+        });
 
         return allergy || null;
     }

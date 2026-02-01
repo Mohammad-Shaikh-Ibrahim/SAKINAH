@@ -17,6 +17,7 @@ const AvailabilitySettingsPage = lazy(() => import('../../features/appointments/
 const DashboardHomePage = lazy(() => import('../../features/dashboard/pages/DashboardHomePage').then(module => ({ default: module.DashboardHomePage })));
 const PrescriptionCreateEditPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionCreateEditPage').then(module => ({ default: module.PrescriptionCreateEditPage })));
 const PrescriptionsListPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionsListPage').then(module => ({ default: module.PrescriptionsListPage })));
+const PrescriptionDetailsPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionDetailsPage').then(module => ({ default: module.PrescriptionDetailsPage })));
 
 const Loading = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -110,6 +111,14 @@ export const router = createBrowserRouter([
                         ),
                     },
                     {
+                        path: 'patients/:patientId/prescriptions/:id',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <PrescriptionDetailsPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
                         path: 'prescriptions',
                         element: (
                             <Suspense fallback={<Loading />}>
@@ -122,6 +131,14 @@ export const router = createBrowserRouter([
                         element: (
                             <Suspense fallback={<Loading />}>
                                 <PrescriptionCreateEditPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: 'prescriptions/:id',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <PrescriptionDetailsPage />
                             </Suspense>
                         ),
                     },

@@ -42,7 +42,7 @@ export const DashboardLayout = () => {
     };
 
     const navItems = [
-        { label: 'Overview', path: '/dashboard' },
+        { label: 'Dashboard', path: '/dashboard' },
         { label: 'Patients', path: '/dashboard/patients' },
         { label: 'Appointments', path: '/dashboard/appointments' },
         { label: 'Prescriptions', path: '/dashboard/prescriptions' }, // Placeholder route, mainly for list
@@ -51,7 +51,7 @@ export const DashboardLayout = () => {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
-            <AppBar position="sticky" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
+            <AppBar position="sticky" elevation={0} className="no-print" sx={{ borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary', display: { xs: 'flex' }, displayPrint: 'none' }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
                         <Box
@@ -138,7 +138,7 @@ export const DashboardLayout = () => {
                 </Container>
             </AppBar>
 
-            <Container component="main" maxWidth="xl" sx={{ flexGrow: 1, py: 4 }}>
+            <Container component="main" maxWidth="xl" sx={{ flexGrow: 1, py: { xs: 4, print: 0 }, px: { xs: 2, print: 0 } }}>
                 <Outlet />
             </Container>
 
@@ -152,7 +152,7 @@ export const DashboardLayout = () => {
                 severity="error"
             />
 
-            <Box component="footer" sx={{ py: 3, px: 2, mt: 'auto', bgcolor: 'background.paper', borderTop: '1px solid', borderColor: 'divider' }}>
+            <Box component="footer" className="no-print" sx={{ py: 3, px: 2, mt: 'auto', bgcolor: 'background.paper', borderTop: '1px solid', borderColor: 'divider', display: { xs: 'block' }, displayPrint: 'none' }}>
                 <Container maxWidth="sm">
                     <Typography variant="body2" color="text.secondary" align="center">
                         {'© '}

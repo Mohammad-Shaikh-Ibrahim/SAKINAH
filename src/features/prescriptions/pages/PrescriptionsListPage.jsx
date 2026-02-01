@@ -11,7 +11,8 @@ import { format } from 'date-fns';
 export const PrescriptionsListPage = () => {
     // This page could be global or per-patient. 
     // If accessed via /dashboard/patients/:id/prescriptions, we filter.
-    const { patientId } = useParams(); // Start with patient-context focus
+    const { patientId: routePatientId, id: routeId } = useParams();
+    const patientId = routePatientId || routeId;
 
     // For MVP, let's assume this page is only used WITHIN patient details for now, 
     // OR we list ALL if no patientId (not implemented in repo yet).
@@ -39,7 +40,7 @@ export const PrescriptionsListPage = () => {
                     variant="contained"
                     startIcon={<AddIcon />}
                     component={RouterLink}
-                    to={`/dashboard/patients/${patientId}/prescriptions/new`}
+                    to={patientId ? `/dashboard/patients/${patientId}/prescriptions/new` : `/dashboard/prescriptions/new`}
                     size="small"
                 >
                     New Prescription
@@ -67,7 +68,16 @@ export const PrescriptionsListPage = () => {
                         ) : (
                             prescriptions.map((rx) => (
                                 <TableRow key={rx.id} hover>
-                                    <TableCell>{rx.prescriptionDate}</TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            component={RouterLink}
+                                            to={patientId ? `/dashboard/patients/${patientId}/prescriptions/${rx.id}` : `/dashboard/prescriptions/${rx.id}`}
+                                            variant="body2"
+                                            sx={{ color: 'primary.main', fontWeight: 'bold', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                                        >
+                                            {rx.prescriptionDate}
+                                        </Typography>
+                                    </TableCell>
                                     <TableCell>
                                         {rx.medications.map(m => (
                                             <div key={m.id}>
@@ -85,14 +95,14 @@ export const PrescriptionsListPage = () => {
                                         />
                                     </TableCell>
                                     <TableCell align="right">
-                                        <IconButton size="small" color="primary">
+                                        <IconButton
+                                            size="small"
+                                            color="primary"
+                                            component={RouterLink}
+                                            to={patientId ? `/dashboard/patients/${patientId}/prescriptions/${rx.id}` : `/dashboard/prescriptions/${rx.id}`}
+                                        >
                                             <VisibilityIcon />
                                         </IconButton>
-                                        {rx.isPrinted && (
-                                            <IconButton size="small" color="secondary">
-                                                <PrintIcon />
-                                            </IconButton>
-                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))

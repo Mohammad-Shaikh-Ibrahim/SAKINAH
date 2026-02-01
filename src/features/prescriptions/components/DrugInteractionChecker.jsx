@@ -18,8 +18,14 @@ export const DrugInteractionChecker = ({ currentMedications = [], patientId }) =
 
             setLoading(true);
             try {
+                const medNames = (currentMedications || [])
+                    .map(m => m?.genericName || m?.medicationName)
+                    .filter(name => !!name && typeof name === 'string');
+
+                if (medNames.length === 0 && !patientId) return;
+
                 const results = await prescriptionsRepository.checkDrugInteractions(
-                    currentMedications.map(m => m.genericName),
+                    medNames,
                     patientId
                 );
                 setInteractions(results);
