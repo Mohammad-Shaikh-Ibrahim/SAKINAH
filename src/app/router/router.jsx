@@ -26,6 +26,9 @@ const MyProfilePage = lazy(() => import('../../features/users/pages/MyProfilePag
 const AuditLogsPage = lazy(() => import('../../features/users/pages/AuditLogsPage'));
 const AccessDeniedPage = lazy(() => import('../../features/users/pages/AccessDeniedPage'));
 
+// Help
+const HelpPage = lazy(() => import('../../features/help/pages/HelpPage').then(module => ({ default: module.HelpPage })));
+
 const Loading = () => (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
@@ -223,6 +226,15 @@ export const router = createBrowserRouter([
                         element: (
                             <Suspense fallback={<Loading />}>
                                 <MyProfilePage />
+                            </Suspense>
+                        ),
+                    },
+                    // Help & Support Page (all authenticated users)
+                    {
+                        path: 'help',
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <HelpPage />
                             </Suspense>
                         ),
                     },

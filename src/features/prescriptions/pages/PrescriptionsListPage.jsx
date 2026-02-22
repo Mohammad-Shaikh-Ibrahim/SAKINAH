@@ -1,56 +1,61 @@
-import React from 'react';
-import { Box, Typography, Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton } from '@mui/material';
+import React, { useMemo } from 'react';
+import { Box, Typography, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import PrintIcon from '@mui/icons-material/LocalPrintshop';
 import { Helmet } from 'react-helmet-async';
-import { Link as RouterLink, useParams } from 'react-router-dom';
+import { Link as RouterLink, useParams, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { usePrescriptionsByPatient, useAllPrescriptions } from '../hooks/usePrescriptions';
 import { selectCurrentUser } from '../../auth/store/authSlice';
 import PermissionGuard from '../../users/components/PermissionGuard';
-import { format } from 'date-fns';
 
 export const PrescriptionsListPage = () => {
-    // This page could be global or per-patient. 
-    // If accessed via /dashboard/patients/:id/prescriptions, we filter.
+    // All hooks must be called unconditionally before any early return
+    const user = useSelector(selectCurrentUser);
+    const role = user?.role;
+
     const { patientId: routePatientId, id: routeId } = useParams();
     const rawPatientId = routePatientId || routeId;
     const patientId = (rawPatientId && rawPatientId !== 'undefined' && rawPatientId !== 'null') ? rawPatientId : null;
 
-    // For MVP, let's assume this page is only used WITHIN patient details for now, 
-    // OR we list ALL if no patientId (not implemented in repo yet).
-    // The instructions say " /dashboard/prescriptions (all prescriptions list)"
-    // but the Repo method `getPrescriptionsByPatient` is what we hook up first.
-    // Let's stick to Patient Context as primary for specific list.
-
-    // If no patientId, we might need a `useAllPrescriptions` hook later.
-    // For now, I'll assume this is the Patient Tab content primarily.
-
-    // Fetch either patient specific or all
     const { data: patientPrescriptions = [], isLoading: isPatientLoading } = usePrescriptionsByPatient(patientId);
     const { data: allPrescriptions = [], isLoading: isAllLoading } = useAllPrescriptions({ enabled: !patientId });
 
-    // PERFORMANCE OPTIMIZATION: Only use data from the relevant hook
-    const prescriptions = patientId ? patientPrescriptions : allPrescriptions;
+    const rawList = patientId ? patientPrescriptions : allPrescriptions;
     const isLoading = patientId ? isPatientLoading : isAllLoading;
 
-    // if (!patientId) ... removed check
+    // Role-based filtering for the global list (no extra filter in patient-tab context)
+    const prescriptions = useMemo(() => {
+        if (patientId) return rawList;
+        if (role === 'doctor') return rawList.filter(rx => rx.doctorId === user?.id);
+        if (role === 'nurse')  return rawList.filter(rx => rx.status === 'active');
+        return rawList; // admin: all
+    }, [rawList, patientId, role, user?.id]);
+
+    const canCreate = role === 'admin' || role === 'doctor';
+
+    // Redirect receptionists — done AFTER all hooks
+    if (role === 'receptionist') {
+        return <Navigate to="/dashboard/access-denied" replace />;
+    }
 
     return (
         <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Typography variant="h6" fontWeight="bold">Prescription History</Typography>
-                <PermissionGuard permission="prescriptions.create">
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        component={RouterLink}
-                        to={patientId ? `/dashboard/patients/${patientId}/prescriptions/new` : `/dashboard/prescriptions/new`}
-                        size="small"
-                    >
-                        New Prescription
-                    </Button>
-                </PermissionGuard>
+                {canCreate && (
+                    <PermissionGuard permission="prescriptions.create">
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            component={RouterLink}
+                            to={patientId ? `/dashboard/patients/${patientId}/prescriptions/new` : `/dashboard/prescriptions/new`}
+                            size="small"
+                        >
+                            New Prescription
+                        </Button>
+                    </PermissionGuard>
+                )}
             </Box>
 
             <TableContainer component={Paper} variant="outlined">
@@ -65,7 +70,13 @@ export const PrescriptionsListPage = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {prescriptions.length === 0 ? (
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                                    <Typography color="text.secondary">Loading…</Typography>
+                                </TableCell>
+                            </TableRow>
+                        ) : prescriptions.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                                     <Typography color="text.secondary">No prescriptions found.</Typography>
@@ -85,7 +96,7 @@ export const PrescriptionsListPage = () => {
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        {rx.medications.map(m => (
+                                        {rx.medications?.map(m => (
                                             <div key={m.id}>
                                                 • <strong>{m.medicationName}</strong> {m.dosage}
                                             </div>

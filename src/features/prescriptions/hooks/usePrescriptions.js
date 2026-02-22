@@ -61,8 +61,13 @@ export const useCreatePrescription = () => {
     return useMutation({
         mutationFn: (data) => prescriptionsRepository.createPrescription(data),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: PRESCRIPTION_KEYS.byPatient(data.patientId) });
-            queryClient.invalidateQueries({ queryKey: PRESCRIPTION_KEYS.activeMeds(data.patientId) });
+            // Invalidate the global "all prescriptions" list (used by DoctorDashboard & PrescriptionsListPage)
+            queryClient.invalidateQueries({ queryKey: PRESCRIPTION_KEYS.lists() });
+            // Invalidate patient-specific lists
+            if (data.patientId) {
+                queryClient.invalidateQueries({ queryKey: PRESCRIPTION_KEYS.byPatient(data.patientId) });
+                queryClient.invalidateQueries({ queryKey: PRESCRIPTION_KEYS.activeMeds(data.patientId) });
+            }
         },
     });
 };

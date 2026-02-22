@@ -45,6 +45,14 @@ class LocalStorageAppointmentsRepository extends BaseRepository {
         );
     }
 
+    /** Fetch ALL appointments in a date range, regardless of doctor — for nurses/receptionists/admins. */
+    async getAllAppointmentsByDateRange(startDate, endDate) {
+        await this.ensureInitialized();
+        return Array.from(this._cache.values())
+            .filter(apt => apt.appointmentDate >= startDate && apt.appointmentDate <= endDate)
+            .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    }
+
     async createAppointment(appointmentData, userId) {
         // checkTimeSlotAvailability returns TRUE when the slot is free, FALSE when there is a conflict
         const isSlotAvailable = await this.checkTimeSlotAvailability(

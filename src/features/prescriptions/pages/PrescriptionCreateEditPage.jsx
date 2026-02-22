@@ -86,7 +86,7 @@ export const PrescriptionCreateEditPage = () => {
 
             <PrescriptionForm
                 patientId={patientId}
-                onSubmit={(data) => onSubmit({ ...data, patientId, doctorId: currentUser?.id })}
+                onSubmit={(data) => onSubmit({ ...data, doctorId: currentUser?.id })}
                 isSubmitting={isSubmitting}
                 onCancel={() => navigate(-1)}
             />

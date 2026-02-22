@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -12,9 +12,11 @@ import {
     LockOutlined as LockIcon,
     Home as HomeIcon,
     ArrowBack as BackIcon,
+    BugReport as BugReportIcon,
 } from '@mui/icons-material';
 import styled from 'styled-components';
 import { usePermissions } from '../hooks/usePermissions';
+import { ReportIssueModal } from '../../help/components/ReportIssueModal';
 
 const StyledPaper = styled(Paper)`
     padding: 48px;
@@ -37,6 +39,7 @@ const IconWrapper = styled(Box)`
 const AccessDeniedPage = () => {
     const navigate = useNavigate();
     const { userRole, currentUser } = usePermissions();
+    const [reportOpen, setReportOpen] = useState(false);
 
     const handleGoBack = () => {
         navigate(-1);
@@ -122,9 +125,23 @@ const AccessDeniedPage = () => {
                         >
                             Go to Dashboard
                         </Button>
+                        <Button
+                            variant="outlined"
+                            color="warning"
+                            startIcon={<BugReportIcon />}
+                            onClick={() => setReportOpen(true)}
+                        >
+                            Report This Issue
+                        </Button>
                     </Stack>
                 </StyledPaper>
             </Box>
+
+            <ReportIssueModal
+                open={reportOpen}
+                onClose={() => setReportOpen(false)}
+                preselectedType="access_denied"
+            />
         </Container>
     );
 };

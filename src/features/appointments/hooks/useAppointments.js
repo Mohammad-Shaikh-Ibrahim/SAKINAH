@@ -24,6 +24,15 @@ export function useAppointments(startDate, endDate) {
     });
 }
 
+/** ALL appointments in a date range across all doctors — for nurses, receptionists, and admins. */
+export function useAllAppointments(startDate, endDate) {
+    return useQuery({
+        queryKey: ['appointments', 'all', { startDate, endDate }],
+        queryFn: () => appointmentsRepository.getAllAppointmentsByDateRange(startDate, endDate),
+        enabled: !!startDate && !!endDate,
+    });
+}
+
 export function useAppointment(id) {
     const user = useSelector(selectCurrentUser);
     const userId = user?.id;

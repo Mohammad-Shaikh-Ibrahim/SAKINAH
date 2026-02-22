@@ -5,6 +5,7 @@ import { Box, Typography, Button, Container, Paper } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useNavigate } from 'react-router-dom';
 
 const ErrorContainer = styled(Container)`
@@ -112,6 +113,15 @@ export const ErrorLayout = ({
                         Refresh
                     </Button>
                 )}
+
+                <Button
+                    variant="outlined"
+                    startIcon={<HelpOutlineIcon />}
+                    onClick={() => navigate('/dashboard/help')}
+                    size="large"
+                >
+                    Get Help
+                </Button>
             </ActionButtons>
         </ErrorContainer>
     );
