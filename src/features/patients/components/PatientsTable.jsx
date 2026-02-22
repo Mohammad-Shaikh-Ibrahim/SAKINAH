@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import {
     Table,
@@ -20,9 +20,17 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link as RouterLink } from 'react-router-dom';
-import { format } from 'date-fns';
+import { formatDate } from '../../../shared/utils/dateUtils';
 
-export const PatientsTable = ({ patients, loading, total, page, limit, onPageChange }) => {
+const COLUMNS = [
+    { id: 'name', label: 'Patient Name' },
+    { id: 'gender', label: 'Gender' },
+    { id: 'phone', label: 'Phone' },
+    { id: 'lastVisit', label: 'Last Visit' },
+    { id: 'actions', label: 'Actions', align: 'right' },
+];
+
+export const PatientsTable = memo(({ patients, loading, total, page, limit, onPageChange }) => {
     if (loading) {
         return (
             <Box>
@@ -33,7 +41,7 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
         );
     }
 
-    if (!loading && patients.length === 0) {
+    if (!loading && (!patients || patients.length === 0)) {
         return (
             <Paper sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
                 <Typography variant="h6">No patients found</Typography>
@@ -42,25 +50,22 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
         );
     }
 
-    const columns = [
-        { id: 'name', label: 'Patient Name' },
-        { id: 'gender', label: 'Gender' },
-        { id: 'phone', label: 'Phone' },
-        { id: 'lastVisit', label: 'Last Visit' },
-        { id: 'actions', label: 'Actions', align: 'right' },
-    ];
-
     return (
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+        <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 2, border: '1px solid', borderColor: 'divider' }} elevation={0}>
             <TableContainer>
                 <Table stickyHeader aria-label="patients table">
                     <TableHead>
                         <TableRow>
-                            {columns.map((column) => (
+                            {COLUMNS.map((column) => (
                                 <TableCell
                                     key={column.id}
                                     align={column.align || 'left'}
-                                    sx={{ fontWeight: 'bold', bgcolor: 'background.default' }}
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        bgcolor: 'background.paper',
+                                        borderBottom: '2px solid',
+                                        borderColor: 'divider'
+                                    }}
                                 >
                                     {column.label}
                                 </TableCell>
@@ -76,7 +81,7 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
                                             {patient.firstName} {patient.lastName}
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary">
-                                            {patient.age} DOB: {patient.dob}
+                                            {patient.age ? `${patient.age} years | ` : ''} DOB: {patient.dob}
                                         </Typography>
                                     </Box>
                                 </TableCell>
@@ -85,15 +90,17 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
                                         label={patient.gender}
                                         size="small"
                                         color={patient.gender === 'male' ? 'info' : 'secondary'}
-                                        variant="outlined"
-                                        sx={{ textTransform: 'capitalize' }}
+                                        variant="tonal"
+                                        sx={{ textTransform: 'capitalize', fontWeight: 'medium' }}
                                     />
                                 </TableCell>
-                                <TableCell>{patient.phone}</TableCell>
+                                <TableCell>
+                                    <Typography variant="body2">{patient.phone}</Typography>
+                                </TableCell>
                                 <TableCell>
                                     {patient.lastVisit
-                                        ? formatDate(patient.lastVisit)
-                                        : <Typography variant="caption" color="text.secondary">Never</Typography>}
+                                        ? <Typography variant="body2">{formatDate(patient.lastVisit)}</Typography>
+                                        : <Typography variant="caption" color="text.secondary">Never visited</Typography>}
                                 </TableCell>
                                 <TableCell align="right">
                                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
@@ -103,6 +110,7 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
                                                 color="primary"
                                                 component={RouterLink}
                                                 to={`/dashboard/patients/${patient.id}`}
+                                                sx={{ bgcolor: 'primary.lighter' }}
                                             >
                                                 <VisibilityIcon fontSize="small" />
                                             </IconButton>
@@ -113,6 +121,7 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
                                                 color="info"
                                                 component={RouterLink}
                                                 to={`/dashboard/patients/${patient.id}/edit`}
+                                                sx={{ bgcolor: 'info.lighter' }}
                                             >
                                                 <EditIcon fontSize="small" />
                                             </IconButton>
@@ -128,18 +137,21 @@ export const PatientsTable = ({ patients, loading, total, page, limit, onPageCha
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid', borderColor: 'divider' }}>
                 <Pagination
                     count={Math.ceil(total / limit)}
                     page={page}
                     onChange={onPageChange}
                     color="primary"
                     shape="rounded"
+                    size="small"
                 />
             </Box>
         </Paper>
     );
-};
+});
+
+PatientsTable.displayName = 'PatientsTable';
 
 PatientsTable.propTypes = {
     patients: PropTypes.array,

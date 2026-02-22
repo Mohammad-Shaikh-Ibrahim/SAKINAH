@@ -3,12 +3,14 @@ import {
     Box, Typography, Button, Dialog, DialogTitle, DialogContent, Divider,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { DocumentsList } from '../../documents/components/DocumentsList';
-import { DocumentUpload } from '../../documents/components/DocumentUpload';
-import { DocumentViewerModal } from '../../documents/components/DocumentViewerModal';
-import { documentsRepository } from '../../documents/api/LocalStorageDocumentsRepository';
+import {
+    DocumentsList,
+    DocumentUpload,
+    DocumentViewerModal,
+    documentsRepository
+} from '../../documents';
 import { formatDate } from '../../../shared/utils/dateUtils';
-import PermissionGuard from '../../users/components/PermissionGuard';
+import { PermissionGuard } from '../../users';
 import { useSelector } from 'react-redux';
 
 export const PatientDocumentsTab = ({ patientId }) => {

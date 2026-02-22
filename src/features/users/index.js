@@ -1,17 +1,22 @@
-// API
+// Public API for Users feature
+
+// API & Repository
 export { usersRepository } from './api/LocalStorageUsersRepository';
 
-// Model
-export * from './model/roles';
-
-// Services
-export { authorizationService } from './services/authorizationService';
-
 // Hooks
-export * from './hooks';
+export { useUsers, useUpdateUser, useDeleteUser, useUserRoleUpdate } from './hooks/useUsers';
+export { usePatientAccess, useGrantPatientAccess, useRevokePatientAccess } from './hooks/usePatientAccess';
+export { usePermissions } from './hooks/usePermissions';
+export { useAuditLogs } from './hooks/useAuditLogs';
 
 // Components
-export * from './components';
+export { default as PermissionGuard, withPermission, RoleGuard } from './components/PermissionGuard';
+export { default as PatientAccessManagement } from './components/PatientAccessManagement';
+export { default as RoleBadge } from './components/RoleBadge';
+
+// Model & Logic
+export { getRolePermissions, ROLE_DEFINITIONS, ROLE_COLORS } from './model/roles';
+export { authorizationService } from './services/authorizationService';
 
 // Pages
 export { default as UserManagementPage } from './pages/UserManagementPage';

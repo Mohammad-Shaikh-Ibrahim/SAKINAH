@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
-import { selectAuth } from '../../features/auth/store/authSlice';
+import { logoutAction as logout, selectCurrentUser } from '../../features/auth';
 import { Box, CircularProgress } from '@mui/material';
-import { usePermissions } from '../../features/users/hooks/usePermissions';
+import { usePermissions } from '../../features/users';
 
 /**
  * ProtectedRoute - Guards routes based on authentication and optional permissions

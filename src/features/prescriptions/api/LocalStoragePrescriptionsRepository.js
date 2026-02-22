@@ -1,6 +1,8 @@
 import prescriptionsSeed from './prescriptions.seed.json';
 import medicationDatabaseSeed from './medicationDatabase.seed.json';
 import drugInteractionsSeed from './drugInteractions.seed.json';
+import { secureStore } from '../../../shared/utils/secureStore';
+import { logger } from '../../../shared/utils/logger';
 
 const STORAGE_KEY_PRESCRIPTIONS = 'sakinah_prescriptions';
 const STORAGE_KEY_MEDICATIONS = 'sakinah_medication_db';
@@ -15,67 +17,44 @@ class LocalStoragePrescriptionsRepository {
     }
 
     async init() {
-        if (!localStorage.getItem(STORAGE_KEY_PRESCRIPTIONS)) {
-            localStorage.setItem(STORAGE_KEY_PRESCRIPTIONS, JSON.stringify(prescriptionsSeed.prescriptions || []));
+        if (!secureStore.getItem(STORAGE_KEY_PRESCRIPTIONS)) {
+            logger.info('Initializing Prescriptions DB (Encrypted)');
+            secureStore.setItem(STORAGE_KEY_PRESCRIPTIONS, prescriptionsSeed.prescriptions || []);
         }
-        if (!localStorage.getItem(STORAGE_KEY_MEDICATIONS)) {
-            localStorage.setItem(STORAGE_KEY_MEDICATIONS, JSON.stringify(medicationDatabaseSeed.medications || []));
+        if (!secureStore.getItem(STORAGE_KEY_MEDICATIONS)) {
+            secureStore.setItem(STORAGE_KEY_MEDICATIONS, medicationDatabaseSeed.medications || []);
         }
-        if (!localStorage.getItem(STORAGE_KEY_INTERACTIONS)) {
-            localStorage.setItem(STORAGE_KEY_INTERACTIONS, JSON.stringify(drugInteractionsSeed.interactions || []));
+        if (!secureStore.getItem(STORAGE_KEY_INTERACTIONS)) {
+            secureStore.setItem(STORAGE_KEY_INTERACTIONS, drugInteractionsSeed.interactions || []);
         }
-        if (!localStorage.getItem(STORAGE_KEY_ALLERGIES)) {
-            localStorage.setItem(STORAGE_KEY_ALLERGIES, JSON.stringify(prescriptionsSeed.patientAllergies || []));
+        if (!secureStore.getItem(STORAGE_KEY_ALLERGIES)) {
+            secureStore.setItem(STORAGE_KEY_ALLERGIES, prescriptionsSeed.patientAllergies || []);
         }
     }
 
     // --- Helpers ---
     _getPrescriptions() {
-        try {
-            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_PRESCRIPTIONS) || '[]');
-            return Array.isArray(data) ? data : [];
-        } catch (e) {
-            console.error('Error parsing prescriptions', e);
-            return [];
-        }
+        return secureStore.getItem(STORAGE_KEY_PRESCRIPTIONS) || [];
     }
 
     _savePrescriptions(prescriptions) {
-        localStorage.setItem(STORAGE_KEY_PRESCRIPTIONS, JSON.stringify(prescriptions));
+        secureStore.setItem(STORAGE_KEY_PRESCRIPTIONS, prescriptions);
     }
 
     _getMedications() {
-        try {
-            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_MEDICATIONS) || '[]');
-            return Array.isArray(data) ? data : [];
-        } catch (e) {
-            console.error('Error parsing medications', e);
-            return [];
-        }
+        return secureStore.getItem(STORAGE_KEY_MEDICATIONS) || [];
     }
 
     _getInteractions() {
-        try {
-            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_INTERACTIONS) || '[]');
-            return Array.isArray(data) ? data : [];
-        } catch (e) {
-            console.error('Error parsing interactions', e);
-            return [];
-        }
+        return secureStore.getItem(STORAGE_KEY_INTERACTIONS) || [];
     }
 
     _getAllergies() {
-        try {
-            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_ALLERGIES) || '[]');
-            return Array.isArray(data) ? data : [];
-        } catch (e) {
-            console.error('Error parsing allergies', e);
-            return [];
-        }
+        return secureStore.getItem(STORAGE_KEY_ALLERGIES) || [];
     }
 
     _saveAllergies(allergies) {
-        localStorage.setItem(STORAGE_KEY_ALLERGIES, JSON.stringify(allergies));
+        secureStore.setItem(STORAGE_KEY_ALLERGIES, allergies);
     }
 
     // --- Prescription CRUD ---

@@ -1,6 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
-import seedData from './users.seed.json';
 import { getRolePermissions, ROLE_DEFINITIONS } from '../model/roles';
+import { secureStore } from '../../../shared/utils/secureStore';
+import { logger } from '../../../shared/utils/logger';
 
 const USERS_KEY = 'sakinah_users_db_v2';
 const PATIENT_ACCESS_KEY = 'sakinah_patient_access_v1';
@@ -16,45 +16,43 @@ class LocalStorageUsersRepository {
 
     _initDB() {
         // Initialize users if not present
-        if (!localStorage.getItem(USERS_KEY)) {
-            localStorage.setItem(USERS_KEY, JSON.stringify(seedData.users));
+        if (!secureStore.getItem(USERS_KEY)) {
+            logger.info('Initializing Users DB (Encrypted)');
+            secureStore.setItem(USERS_KEY, seedData.users);
         }
         // Initialize patient access if not present
-        if (!localStorage.getItem(PATIENT_ACCESS_KEY)) {
-            localStorage.setItem(PATIENT_ACCESS_KEY, JSON.stringify(seedData.patientAccess || []));
+        if (!secureStore.getItem(PATIENT_ACCESS_KEY)) {
+            secureStore.setItem(PATIENT_ACCESS_KEY, seedData.patientAccess || []);
         }
         // Initialize audit logs if not present
-        if (!localStorage.getItem(AUDIT_LOGS_KEY)) {
-            localStorage.setItem(AUDIT_LOGS_KEY, JSON.stringify([]));
+        if (!secureStore.getItem(AUDIT_LOGS_KEY)) {
+            secureStore.setItem(AUDIT_LOGS_KEY, []);
         }
     }
 
     // Private helpers
     _getUsers() {
-        const data = localStorage.getItem(USERS_KEY);
-        return data ? JSON.parse(data) : [];
+        return secureStore.getItem(USERS_KEY) || [];
     }
 
     _saveUsers(users) {
-        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        secureStore.setItem(USERS_KEY, users);
     }
 
     _getPatientAccess() {
-        const data = localStorage.getItem(PATIENT_ACCESS_KEY);
-        return data ? JSON.parse(data) : [];
+        return secureStore.getItem(PATIENT_ACCESS_KEY) || [];
     }
 
     _savePatientAccess(accessList) {
-        localStorage.setItem(PATIENT_ACCESS_KEY, JSON.stringify(accessList));
+        secureStore.setItem(PATIENT_ACCESS_KEY, accessList);
     }
 
     _getAuditLogs() {
-        const data = localStorage.getItem(AUDIT_LOGS_KEY);
-        return data ? JSON.parse(data) : [];
+        return secureStore.getItem(AUDIT_LOGS_KEY) || [];
     }
 
     _saveAuditLogs(logs) {
-        localStorage.setItem(AUDIT_LOGS_KEY, JSON.stringify(logs));
+        secureStore.setItem(AUDIT_LOGS_KEY, logs);
     }
 
     _sanitizeUser(user) {

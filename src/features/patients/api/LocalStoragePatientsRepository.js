@@ -1,5 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
 import seedData from './patients.seed.json';
+import { secureStore } from '../../../shared/utils/secureStore';
+import { logger } from '../../../shared/utils/logger';
 
 const STORAGE_KEY = 'patients_db_v1';
 
@@ -12,28 +13,19 @@ class LocalStoragePatientsRepository {
     }
 
     async init() {
-        const existing = localStorage.getItem(STORAGE_KEY);
+        const existing = secureStore.getItem(STORAGE_KEY);
         if (!existing) {
-            console.log('Seeding database...');
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
-        } else {
-            // Optional: Merge strategy or schema migration could go here
+            logger.info('Seeding Patients Database (Encrypted)');
+            secureStore.setItem(STORAGE_KEY, seedData);
         }
     }
 
     _getAll() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            const parsed = data ? JSON.parse(data) : [];
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            console.error('Error parsing patients db', e);
-            return [];
-        }
+        return secureStore.getItem(STORAGE_KEY) || [];
     }
 
     _save(data) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        secureStore.setItem(STORAGE_KEY, data);
     }
 
     async getAll({ userId, search = '', page = 1, limit = 10, sort = 'desc' } = {}) {

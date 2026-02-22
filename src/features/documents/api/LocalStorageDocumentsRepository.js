@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { secureStore } from '../../../shared/utils/secureStore';
+import { logger } from '../../../shared/utils/logger';
 
 const STORAGE_KEY = 'documents_db_v1';
 
@@ -57,18 +59,11 @@ export function downloadFile(base64Data, fileName, mimeType) {
 
 class LocalStorageDocumentsRepository {
     _getAll() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            const parsed = data ? JSON.parse(data) : [];
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            console.error('Error reading documents db', e);
-            return [];
-        }
+        return secureStore.getItem(STORAGE_KEY) || [];
     }
 
     _save(data) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        secureStore.setItem(STORAGE_KEY, data);
     }
 
     async getCategories() {

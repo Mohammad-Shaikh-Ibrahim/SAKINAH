@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout, selectCurrentUser } from '../../features/auth/store/authSlice';
+import { logoutAction as logout, selectCurrentUser } from '../../features/auth';
 import {
     AppBar,
     Toolbar,
@@ -28,8 +28,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ConfirmModal } from '../../shared/ui/ConfirmModal';
-import { usePermissions } from '../../features/users/hooks/usePermissions';
-import { ROLE_COLORS } from '../../features/users/model/roles';
+import { ConfirmModal } from '../../shared/ui/ConfirmModal';
+import { usePermissions, ROLE_COLORS } from '../../features/users';
 
 export const DashboardLayout = () => {
     const dispatch = useDispatch();

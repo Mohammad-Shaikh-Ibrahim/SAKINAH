@@ -11,7 +11,7 @@ import { store } from '../store';
 import { queryClient } from '../../shared/lib/queryClient';
 import { theme } from '../../shared/theme/theme';
 import { GlobalStyles } from '../../shared/theme/GlobalStyles';
-import { initializeAuth } from '../../features/auth/store/authSlice';
+import { initializeAuth } from '../../features/auth';
 
 const AuthInitializer = ({ children }) => {
     const dispatch = useDispatch();

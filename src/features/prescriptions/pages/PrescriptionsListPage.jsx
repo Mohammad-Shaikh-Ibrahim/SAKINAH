@@ -28,8 +28,9 @@ export const PrescriptionsListPage = () => {
 
     // Fetch either patient specific or all
     const { data: patientPrescriptions = [], isLoading: isPatientLoading } = usePrescriptionsByPatient(patientId);
-    const { data: allPrescriptions = [], isLoading: isAllLoading } = useAllPrescriptions();
+    const { data: allPrescriptions = [], isLoading: isAllLoading } = useAllPrescriptions({ enabled: !patientId });
 
+    // PERFORMANCE OPTIMIZATION: Only use data from the relevant hook
     const prescriptions = patientId ? patientPrescriptions : allPrescriptions;
     const isLoading = patientId ? isPatientLoading : isAllLoading;
 

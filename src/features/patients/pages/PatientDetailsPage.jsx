@@ -23,11 +23,9 @@ import { usePatient, useDeletePatient } from '../api/usePatients';
 import { Helmet } from 'react-helmet-async';
 import { formatDate } from '../../../shared/utils/dateUtils';
 import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
-import { PrescriptionsListPage } from '../../prescriptions/pages/PrescriptionsListPage';
+import { PrescriptionsListPage } from '../../prescriptions';
 import { PatientDocumentsTab } from '../components/PatientDocumentsTab';
-import PatientAccessManagement from '../../users/components/PatientAccessManagement';
-import PermissionGuard from '../../users/components/PermissionGuard';
-import { usePermissions } from '../../users/hooks/usePermissions';
+import { PatientAccessManagement, PermissionGuard, usePermissions } from '../../users';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;

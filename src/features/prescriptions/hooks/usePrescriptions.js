@@ -22,10 +22,11 @@ export const usePrescriptionsByPatient = (patientId) => {
     });
 };
 
-export const useAllPrescriptions = () => {
+export const useAllPrescriptions = (options = {}) => {
     return useQuery({
         queryKey: PRESCRIPTION_KEYS.lists(),
         queryFn: () => prescriptionsRepository.getAllPrescriptions(),
+        ...options
     });
 };
 

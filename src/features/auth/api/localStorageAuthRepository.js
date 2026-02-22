@@ -1,5 +1,5 @@
-import { usersRepository } from '../../users/api/LocalStorageUsersRepository';
 import { getRolePermissions } from '../../users/model/roles';
+import { secureStore } from '../../../shared/utils/secureStore';
 
 const SESSION_KEY = 'sakinah_session_v1';
 
@@ -57,16 +57,15 @@ class LocalStorageAuthRepository {
     }
 
     logout() {
-        localStorage.removeItem(SESSION_KEY);
+        secureStore.removeItem(SESSION_KEY);
     }
 
     restoreSession() {
-        const sessionData = localStorage.getItem(SESSION_KEY);
-        if (!sessionData) return null;
+        const session = secureStore.getItem(SESSION_KEY);
+        if (!session) return null;
 
-        const session = JSON.parse(sessionData);
         if (Date.now() > session.expiresAt) {
-            localStorage.removeItem(SESSION_KEY);
+            secureStore.removeItem(SESSION_KEY);
             return null;
         }
 

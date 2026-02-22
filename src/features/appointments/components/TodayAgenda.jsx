@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, memo } from 'react';
 import {
     Card,
     CardContent,
@@ -20,17 +20,17 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useAppointments } from '../hooks/useAppointments';
 import { format } from 'date-fns';
 
-export const TodayAgenda = () => {
+export const TodayAgenda = memo(() => {
     // Fetch appointments for today
-    const today = format(new Date(), 'yyyy-MM-dd');
+    const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
     const { data: appointments = [], isLoading } = useAppointments(today, today);
 
-    // Sort by time
-    const sortedAppointments = [...appointments].sort((a, b) =>
-        a.startTime.localeCompare(b.startTime)
-    );
-
-    const activeAppointments = sortedAppointments.filter(a => a.status !== 'cancelled');
+    // Sort and filter with memoization
+    const activeAppointments = useMemo(() => {
+        return [...appointments]
+            .filter(a => a.status !== 'cancelled')
+            .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    }, [appointments]);
 
     if (isLoading) {
         return <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />;
@@ -129,4 +129,4 @@ export const TodayAgenda = () => {
             </Box>
         </Card>
     );
-};
+});
