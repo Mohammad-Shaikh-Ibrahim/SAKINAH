@@ -8,6 +8,7 @@ import { DocumentUpload } from '../../documents/components/DocumentUpload';
 import { DocumentViewerModal } from '../../documents/components/DocumentViewerModal';
 import { documentsRepository } from '../../documents/api/LocalStorageDocumentsRepository';
 import { useSelector } from 'react-redux';
+import PermissionGuard from '../../users/components/PermissionGuard';
 
 export const PatientDocumentsTab = ({ patientId }) => {
     const [uploadOpen, setUploadOpen] = useState(false);
@@ -29,14 +30,16 @@ export const PatientDocumentsTab = ({ patientId }) => {
             {/* Tab Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6" fontWeight="bold">Patient Documents</Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<UploadFileIcon />}
-                    onClick={() => setUploadOpen(true)}
-                    sx={{ bgcolor: '#2D9596', '&:hover': { bgcolor: '#267D7E' } }}
-                >
-                    Upload Document
-                </Button>
+                <PermissionGuard permission="documents.create">
+                    <Button
+                        variant="contained"
+                        startIcon={<UploadFileIcon />}
+                        onClick={() => setUploadOpen(true)}
+                        sx={{ bgcolor: '#2D9596', '&:hover': { bgcolor: '#267D7E' } }}
+                    >
+                        Upload Document
+                    </Button>
+                </PermissionGuard>
             </Box>
             <Divider sx={{ mb: 2 }} />
 

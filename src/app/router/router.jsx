@@ -79,89 +79,111 @@ export const router = createBrowserRouter([
                     {
                         path: 'patients',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PatientsListPage />
-                            </Suspense>
+                            <ProtectedRoute permissions={['patients.read', 'patients.read.demographics']}>
+                                <Suspense fallback={<Loading />}>
+                                    <PatientsListPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'patients/new',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PatientCreateEditPage />
-                            </Suspense>
+                            <ProtectedRoute permissions={['patients.write']}>
+                                <Suspense fallback={<Loading />}>
+                                    <PatientCreateEditPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'patients/:id',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PatientDetailsPage />
-                            </Suspense>
+                            <ProtectedRoute permissions={['patients.read', 'patients.read.demographics']}>
+                                <Suspense fallback={<Loading />}>
+                                    <PatientDetailsPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'patients/:id/edit',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PatientCreateEditPage />
-                            </Suspense>
+                            <ProtectedRoute permissions={['patients.write']}>
+                                <Suspense fallback={<Loading />}>
+                                    <PatientCreateEditPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'patients/:patientId/prescriptions/new',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PrescriptionCreateEditPage />
-                            </Suspense>
+                            <ProtectedRoute permission="prescriptions.create">
+                                <Suspense fallback={<Loading />}>
+                                    <PrescriptionCreateEditPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'patients/:patientId/prescriptions/:id',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PrescriptionDetailsPage />
-                            </Suspense>
+                            <ProtectedRoute permission="prescriptions.read">
+                                <Suspense fallback={<Loading />}>
+                                    <PrescriptionDetailsPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'prescriptions',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PrescriptionsListPage />
-                            </Suspense>
+                            <ProtectedRoute permission="prescriptions.read">
+                                <Suspense fallback={<Loading />}>
+                                    <PrescriptionsListPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'prescriptions/new',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PrescriptionCreateEditPage />
-                            </Suspense>
+                            <ProtectedRoute permission="prescriptions.create">
+                                <Suspense fallback={<Loading />}>
+                                    <PrescriptionCreateEditPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'prescriptions/:id',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <PrescriptionDetailsPage />
-                            </Suspense>
+                            <ProtectedRoute permission="prescriptions.read">
+                                <Suspense fallback={<Loading />}>
+                                    <PrescriptionDetailsPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'appointments',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <AppointmentsPage />
-                            </Suspense>
+                            <ProtectedRoute permission="appointments.read">
+                                <Suspense fallback={<Loading />}>
+                                    <AppointmentsPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     {
                         path: 'appointments/settings',
                         element: (
-                            <Suspense fallback={<Loading />}>
-                                <AvailabilitySettingsPage />
-                            </Suspense>
+                            <ProtectedRoute permission="appointments.update">
+                                <Suspense fallback={<Loading />}>
+                                    <AvailabilitySettingsPage />
+                                </Suspense>
+                            </ProtectedRoute>
                         ),
                     },
                     // User Management (Admin only)

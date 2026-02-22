@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import { usePrescriptionsByPatient, useAllPrescriptions } from '../hooks/usePrescriptions';
 import { format } from 'date-fns';
+import PermissionGuard from '../../users/components/PermissionGuard';
 
 export const PrescriptionsListPage = () => {
     // This page could be global or per-patient. 
@@ -37,15 +38,17 @@ export const PrescriptionsListPage = () => {
         <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Typography variant="h6" fontWeight="bold">Prescription History</Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    component={RouterLink}
-                    to={patientId ? `/dashboard/patients/${patientId}/prescriptions/new` : `/dashboard/prescriptions/new`}
-                    size="small"
-                >
-                    New Prescription
-                </Button>
+                <PermissionGuard permission="prescriptions.create">
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        component={RouterLink}
+                        to={patientId ? `/dashboard/patients/${patientId}/prescriptions/new` : `/dashboard/prescriptions/new`}
+                        size="small"
+                    >
+                        New Prescription
+                    </Button>
+                </PermissionGuard>
             </Box>
 
             <TableContainer component={Paper} variant="outlined">

@@ -17,6 +17,7 @@ import { AppointmentCalendar } from '../components/AppointmentCalendar';
 import { AppointmentsList } from '../components/AppointmentsList';
 import { AppointmentFormModal } from '../components/AppointmentFormModal';
 import { AppointmentDetailsModal } from '../components/AppointmentDetailsModal';
+import PermissionGuard from '../../users/components/PermissionGuard';
 import {
     startOfMonth, endOfMonth,
     startOfWeek, endOfWeek,
@@ -135,20 +136,22 @@ export const AppointmentsPage = () => {
                         </ToggleButton>
                     </ToggleButtonGroup>
 
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => { setSelectedAppointment(null); setIsFormOpen(true); }}
-                        sx={{
-                            height: 40,
-                            px: 3,
-                            borderRadius: '20px',
-                            bgcolor: '#2D9596',
-                            '&:hover': { bgcolor: '#267D7E' }
-                        }}
-                    >
-                        Book Appointment
-                    </Button>
+                    <PermissionGuard permission="appointments.create">
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => { setSelectedAppointment(null); setIsFormOpen(true); }}
+                            sx={{
+                                height: 40,
+                                px: 3,
+                                borderRadius: '20px',
+                                bgcolor: '#2D9596',
+                                '&:hover': { bgcolor: '#267D7E' }
+                            }}
+                        >
+                            Book Appointment
+                        </Button>
+                    </PermissionGuard>
                 </Box>
             </Box>
 

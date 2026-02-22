@@ -25,6 +25,9 @@ import { formatDate } from '../../../shared/utils/dateUtils';
 import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
 import { PrescriptionsListPage } from '../../prescriptions/pages/PrescriptionsListPage';
 import { PatientDocumentsTab } from '../components/PatientDocumentsTab';
+import PatientAccessManagement from '../../users/components/PatientAccessManagement';
+import PermissionGuard from '../../users/components/PermissionGuard';
+import { usePermissions } from '../../users/hooks/usePermissions';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -50,6 +53,7 @@ export const PatientDetailsPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [tabValue, setTabValue] = useState(0);
+    const { isAdmin, isDoctor, hasPermission } = usePermissions();
 
     const { data: patient, isLoading, isError } = usePatient(id);
     const deleteMutation = useDeletePatient();
@@ -97,22 +101,26 @@ export const PatientDetailsPage = () => {
                     sx={{ textTransform: 'capitalize', ml: 1 }}
                 />
                 <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-                    <Button
-                        variant="outlined"
-                        startIcon={<EditIcon />}
-                        component={RouterLink}
-                        to={`/dashboard/patients/${id}/edit`}
-                    >
-                        Edit
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        color="error"
-                        startIcon={<DeleteIcon />}
-                        onClick={handleDeleteClick}
-                    >
-                        Delete
-                    </Button>
+                    <PermissionGuard permission="patients.update">
+                        <Button
+                            variant="outlined"
+                            startIcon={<EditIcon />}
+                            component={RouterLink}
+                            to={`/dashboard/patients/${id}/edit`}
+                        >
+                            Edit
+                        </Button>
+                    </PermissionGuard>
+                    <PermissionGuard permission="patients.delete">
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            startIcon={<DeleteIcon />}
+                            onClick={handleDeleteClick}
+                        >
+                            Delete
+                        </Button>
+                    </PermissionGuard>
                 </Box>
             </Box>
 
@@ -121,9 +129,10 @@ export const PatientDetailsPage = () => {
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="patient tabs">
                         <Tab label="Overview" />
-                        <Tab label="Medical History" />
-                        <Tab label="Prescriptions" />
-                        <Tab label="Documents" />
+                        {hasPermission('patients.read') && <Tab label="Medical History" />}
+                        {hasPermission('prescriptions.read') && <Tab label="Prescriptions" />}
+                        {(hasPermission('documents.read') || hasPermission('documents.read.insurance')) && <Tab label="Documents" />}
+                        {(isAdmin || isDoctor) && <Tab label="Access" />}
                     </Tabs>
                 </Box>
 
@@ -161,8 +170,8 @@ export const PatientDetailsPage = () => {
                                 Last visit recorded on {formatDate(patient.updatedAt)}
                             </Alert>
 
-                            {/* Display Latest Vitals if available */}
-                            {patient.complaints && patient.complaints.length > 0 && (
+                            {/* Display Latest Vitals if available (Clinical users only) */}
+                            {hasPermission('patients.read') && patient.complaints && patient.complaints.length > 0 && (
                                 <Card variant="outlined">
                                     <CardContent>
                                         <Typography variant="subtitle1" fontWeight="bold">Latest Vitals</Typography>
@@ -188,47 +197,63 @@ export const PatientDetailsPage = () => {
                 </TabPanel>
 
                 {/* Medical History Tab */}
-                <TabPanel value={tabValue} index={1}>
-                    {(!patient.complaints || patient.complaints.length === 0) ? (
-                        <Typography color="text.secondary">No medical history recorded.</Typography>
-                    ) : (
-                        <Box>
-                            {patient.complaints.map((c, i) => (
-                                <Card key={c.id || i} sx={{ mb: 2 }}>
-                                    <CardContent>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Typography variant="h6" color="primary">{c.chiefComplaint}</Typography>
-                                            <Typography variant="caption">{formatDate(c.visitDate)}</Typography>
-                                        </Box>
-                                        <Typography variant="body2" sx={{ mt: 1 }}><strong>Severity:</strong> {c.severity} | <strong>Duration:</strong> {c.duration}</Typography>
-                                        <Typography variant="body2" sx={{ mt: 1 }}>{c.notes}</Typography>
-
-                                        {c.symptoms && c.symptoms.length > 0 && (
-                                            <Box sx={{ mt: 2 }}>
-                                                <Typography variant="subtitle2">Symptoms:</Typography>
-                                                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
-                                                    {c.symptoms.map((s, idx) => (
-                                                        <Chip key={idx} label={`${s.name} (${s.severity})`} size="small" variant="outlined" />
-                                                    ))}
-                                                </Box>
+                {hasPermission('patients.read') && (
+                    <TabPanel value={tabValue} index={1}>
+                        {(!patient.complaints || patient.complaints.length === 0) ? (
+                            <Typography color="text.secondary">No medical history recorded.</Typography>
+                        ) : (
+                            <Box>
+                                {patient.complaints.map((c, i) => (
+                                    <Card key={c.id || i} sx={{ mb: 2 }}>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <Typography variant="h6" color="primary">{c.chiefComplaint}</Typography>
+                                                <Typography variant="caption">{formatDate(c.visitDate)}</Typography>
                                             </Box>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </Box>
-                    )}
-                </TabPanel>
+                                            <Typography variant="body2" sx={{ mt: 1 }}><strong>Severity:</strong> {c.severity} | <strong>Duration:</strong> {c.duration}</Typography>
+                                            <Typography variant="body2" sx={{ mt: 1 }}>{c.notes}</Typography>
+
+                                            {c.symptoms && c.symptoms.length > 0 && (
+                                                <Box sx={{ mt: 2 }}>
+                                                    <Typography variant="subtitle2">Symptoms:</Typography>
+                                                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
+                                                        {c.symptoms.map((s, idx) => (
+                                                            <Chip key={idx} label={`${s.name} (${s.severity})`} size="small" variant="outlined" />
+                                                        ))}
+                                                    </Box>
+                                                </Box>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </Box>
+                        )}
+                    </TabPanel>
+                )}
 
                 {/* Prescriptions Tab */}
-                <TabPanel value={tabValue} index={2}>
-                    <PrescriptionsListPage />
-                </TabPanel>
+                {hasPermission('prescriptions.read') && (
+                    <TabPanel value={tabValue} index={2}>
+                        <PrescriptionsListPage />
+                    </TabPanel>
+                )}
 
                 {/* Documents Tab */}
-                <TabPanel value={tabValue} index={3}>
-                    <PatientDocumentsTab patientId={id} />
-                </TabPanel>
+                {(hasPermission('documents.read') || hasPermission('documents.read.insurance')) && (
+                    <TabPanel value={tabValue} index={3}>
+                        <PatientDocumentsTab patientId={id} />
+                    </TabPanel>
+                )}
+
+                {/* Access Tab (Admin/Doctor Only) */}
+                {(isAdmin || isDoctor) && (
+                    <TabPanel value={tabValue} index={4}>
+                        <PatientAccessManagement
+                            patientId={id}
+                            patientName={`${patient.firstName} ${patient.lastName}`}
+                        />
+                    </TabPanel>
+                )}
             </Paper>
 
             <ConfirmModal
