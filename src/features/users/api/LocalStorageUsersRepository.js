@@ -517,13 +517,15 @@ class LocalStorageUsersRepository {
             throw new Error('Only doctors or admins can grant patient access');
         }
 
-        // Check target user exists and is nurse or receptionist
+        // Check target user exists
         const targetUser = users.find(u => u.id === targetUserId);
         if (!targetUser) {
             throw new Error('Target user not found');
         }
-        if (!['nurse', 'receptionist'].includes(targetUser.role)) {
-            throw new Error('Patient access can only be granted to nurses or receptionists');
+
+        // Admins can grant to anyone. Doctors can only grant to nurses/receptionists.
+        if (granter.role !== 'admin' && !['nurse', 'receptionist'].includes(targetUser.role)) {
+            throw new Error('Doctors can only grant patient access to nurses or receptionists. Administrators can grant to any user.');
         }
 
         // Check if access already exists
@@ -687,12 +689,24 @@ class LocalStorageUsersRepository {
         return access ? access.accessLevel : null;
     }
 
-    // Get nurses and receptionists for sharing dropdown
-    async getSharableUsers(adminUserId) {
+    // Get users for sharing dropdown
+    async getSharableUsers(requesterUserId) {
         await delay(300);
         const users = this._getUsers();
+        const requester = users.find(u => u.id === requesterUserId);
+
+        if (!requester) return [];
+
         return users
-            .filter(u => ['nurse', 'receptionist'].includes(u.role) && u.isActive)
+            .filter(u => {
+                // Cannot share with self
+                if (u.id === requesterUserId) return false;
+                if (!u.isActive) return false;
+
+                // Admins see everyone. Doctors see only nurses/receptionists.
+                if (requester.role === 'admin') return true;
+                return ['nurse', 'receptionist'].includes(u.role);
+            })
             .map(u => this._sanitizeUser(u));
     }
 

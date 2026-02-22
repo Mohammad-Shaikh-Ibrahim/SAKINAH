@@ -7,8 +7,9 @@ import { DocumentsList } from '../../documents/components/DocumentsList';
 import { DocumentUpload } from '../../documents/components/DocumentUpload';
 import { DocumentViewerModal } from '../../documents/components/DocumentViewerModal';
 import { documentsRepository } from '../../documents/api/LocalStorageDocumentsRepository';
-import { useSelector } from 'react-redux';
+import { formatDate } from '../../../shared/utils/dateUtils';
 import PermissionGuard from '../../users/components/PermissionGuard';
+import { useSelector } from 'react-redux';
 
 export const PatientDocumentsTab = ({ patientId }) => {
     const [uploadOpen, setUploadOpen] = useState(false);

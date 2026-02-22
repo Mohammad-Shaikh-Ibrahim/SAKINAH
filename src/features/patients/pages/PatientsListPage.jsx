@@ -17,6 +17,7 @@ import { PatientsTable } from '../components/PatientsTable';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../auth/store/authSlice';
+import PermissionGuard from '../../users/components/PermissionGuard';
 
 export const PatientsListPage = () => {
     const user = useSelector(selectCurrentUser);
@@ -56,16 +57,18 @@ export const PatientsListPage = () => {
                 <Typography variant="h4" component="h1" fontWeight="bold" color="text.primary">
                     Patients
                 </Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    component={RouterLink}
-                    to="/dashboard/patients/new"
-                    sx={{ height: 48, px: 3 }}
-                >
-                    Add Patient
-                </Button>
+                <PermissionGuard permission="patients.create">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        component={RouterLink}
+                        to="/dashboard/patients/new"
+                        sx={{ height: 48, px: 3 }}
+                    >
+                        Add Patient
+                    </Button>
+                </PermissionGuard>
             </Box>
 
             <Paper sx={{ p: 2, mb: 3 }}>

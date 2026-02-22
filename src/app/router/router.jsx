@@ -89,7 +89,7 @@ export const router = createBrowserRouter([
                     {
                         path: 'patients/new',
                         element: (
-                            <ProtectedRoute permissions={['patients.write']}>
+                            <ProtectedRoute permissions={['patients.create']}>
                                 <Suspense fallback={<Loading />}>
                                     <PatientCreateEditPage />
                                 </Suspense>
@@ -109,7 +109,7 @@ export const router = createBrowserRouter([
                     {
                         path: 'patients/:id/edit',
                         element: (
-                            <ProtectedRoute permissions={['patients.write']}>
+                            <ProtectedRoute permissions={['patients.update']}>
                                 <Suspense fallback={<Loading />}>
                                     <PatientCreateEditPage />
                                 </Suspense>

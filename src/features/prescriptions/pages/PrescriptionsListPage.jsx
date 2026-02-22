@@ -6,8 +6,9 @@ import PrintIcon from '@mui/icons-material/LocalPrintshop';
 import { Helmet } from 'react-helmet-async';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import { usePrescriptionsByPatient, useAllPrescriptions } from '../hooks/usePrescriptions';
-import { format } from 'date-fns';
+import { selectCurrentUser } from '../../auth/store/authSlice';
 import PermissionGuard from '../../users/components/PermissionGuard';
+import { format } from 'date-fns';
 
 export const PrescriptionsListPage = () => {
     // This page could be global or per-patient. 

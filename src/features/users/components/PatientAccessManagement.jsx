@@ -28,7 +28,7 @@ import {
     Alert,
     CircularProgress,
     Tooltip,
-    Divider,
+    ListSubheader,
 } from '@mui/material';
 import {
     PersonAdd as PersonAddIcon,
@@ -125,8 +125,8 @@ const PatientAccessManagement = ({ patientId, patientName }) => {
                         data.accessLevel === 'full'
                             ? ['read', 'update', 'update-vitals']
                             : data.accessLevel === 'read-only'
-                            ? ['read']
-                            : ['read', 'update-vitals'],
+                                ? ['read']
+                                : ['read', 'update-vitals'],
                 },
             });
             handleCloseShareModal();
@@ -147,10 +147,19 @@ const PatientAccessManagement = ({ patientId, patientName }) => {
         }
     };
 
-    // Filter out users who already have access
-    const availableUsers = (sharableUsers || []).filter(
-        (user) =>
-            !accessList?.some((access) => access.userId === user.id)
+    // Group and sort users by role
+    const availableUsersByRole = (sharableUsers || [])
+        .filter((user) => !accessList?.some((access) => access.userId === user.id))
+        .reduce((acc, user) => {
+            if (!acc[user.role]) acc[user.role] = [];
+            acc[user.role].push(user);
+            return acc;
+        }, {});
+
+    // Sort roles in a specific order
+    const roleOrder = ['doctor', 'nurse', 'receptionist', 'admin'];
+    const sortedRoles = Object.keys(availableUsersByRole).sort(
+        (a, b) => roleOrder.indexOf(a) - roleOrder.indexOf(b)
     );
 
     if (!canGrantPatientAccess) {
@@ -287,29 +296,30 @@ const PatientAccessManagement = ({ patientId, patientName }) => {
                                         <FormControl fullWidth error={!!errors.userId}>
                                             <InputLabel>Staff Member</InputLabel>
                                             <Select {...field} label="Staff Member">
-                                                {availableUsers.length === 0 ? (
+                                                {sortedRoles.length === 0 ? (
                                                     <MenuItem disabled>
                                                         No available users
                                                     </MenuItem>
                                                 ) : (
-                                                    availableUsers.map((user) => (
-                                                        <MenuItem key={user.id} value={user.id}>
-                                                            <Stack
-                                                                direction="row"
-                                                                spacing={1}
-                                                                alignItems="center"
-                                                            >
-                                                                <span>{user.fullName}</span>
-                                                                <Chip
-                                                                    label={user.role}
-                                                                    size="small"
-                                                                    sx={{
-                                                                        textTransform: 'capitalize',
-                                                                    }}
-                                                                />
-                                                            </Stack>
-                                                        </MenuItem>
-                                                    ))
+                                                    sortedRoles.map((role) => [
+                                                        <ListSubheader key={`header-${role}`} sx={{ textTransform: 'capitalize', fontWeight: 'bold', color: 'primary.main', bgcolor: 'background.paper' }}>
+                                                            {role}s
+                                                        </ListSubheader>,
+                                                        ...availableUsersByRole[role].map((user) => (
+                                                            <MenuItem key={user.id} value={user.id}>
+                                                                <Stack
+                                                                    direction="row"
+                                                                    spacing={1}
+                                                                    alignItems="center"
+                                                                >
+                                                                    <span>{user.fullName}</span>
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        ({user.email})
+                                                                    </Typography>
+                                                                </Stack>
+                                                            </MenuItem>
+                                                        )),
+                                                    ])
                                                 )}
                                             </Select>
                                             {errors.userId && (
