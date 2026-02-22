@@ -8,8 +8,7 @@ import {
 } from '@mui/material';
 import { Helmet } from 'react-helmet-async';
 import { TodayAgenda } from '../../appointments/components/TodayAgenda';
-// Assuming file structure: src/features/dashboard/pages/DashboardHomePage.jsx
-// So path to appointments components: ../../appointments/components/...
+import { AnalyticsWidget } from '../components/AnalyticsWidget';
 import { Link as RouterLink } from 'react-router-dom';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -76,12 +75,7 @@ export const DashboardHomePage = () => {
                     <TodayAgenda />
                 </Grid>
                 <Grid item xs={12} md={8}>
-                    {/* Placeholder for Recent Activity or Statistics */}
-                    <Paper sx={{ p: 3, height: '100%', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.02)' }}>
-                        <Typography color="text.secondary">
-                            Statistics and Patient Analytics Widget (Coming Soon)
-                        </Typography>
-                    </Paper>
+                    <AnalyticsWidget />
                 </Grid>
             </Grid>
         </React.Fragment>
