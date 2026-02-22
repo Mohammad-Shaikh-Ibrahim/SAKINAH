@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import {
     Box, Typography, Grid, Card, CardContent, CardActionArea, Chip,
     TextField, InputAdornment, ToggleButton, ToggleButtonGroup,
-    CircularProgress, Alert, IconButton, Tooltip, Divider,
+    CircularProgress, Alert, IconButton, Tooltip,
 } from '@mui/material';
+
 import SearchIcon from '@mui/icons-material/Search';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ListIcon from '@mui/icons-material/List';
