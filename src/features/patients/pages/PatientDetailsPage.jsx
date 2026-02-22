@@ -24,6 +24,7 @@ import { Helmet } from 'react-helmet-async';
 import { formatDate } from '../../../shared/utils/dateUtils';
 import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
 import { PrescriptionsListPage } from '../../prescriptions/pages/PrescriptionsListPage';
+import { PatientDocumentsTab } from '../components/PatientDocumentsTab';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -224,9 +225,9 @@ export const PatientDetailsPage = () => {
                     <PrescriptionsListPage />
                 </TabPanel>
 
-                {/* Documents Tab - Placeholder */}
+                {/* Documents Tab */}
                 <TabPanel value={tabValue} index={3}>
-                    <Typography color="text.secondary">No documents attached.</Typography>
+                    <PatientDocumentsTab patientId={id} />
                 </TabPanel>
             </Paper>
 
