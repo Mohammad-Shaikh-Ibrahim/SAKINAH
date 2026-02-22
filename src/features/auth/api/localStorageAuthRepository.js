@@ -6,15 +6,16 @@ import { usersRepository } from '../../users/api/LocalStorageUsersRepository';
 const SESSION_KEY = 'sakinah_session_v1';
 
 class LocalStorageAuthRepository {
-    async login({ email, password }) {
+    async login({ email, password, remember = false }) {
         // Delegate to users repository which handles authentication and audit logging
-        return await usersRepository.authenticate(email, password);
+        return await usersRepository.authenticate(email, password, remember);
     }
 
     async register({ fullName, email, password }) {
-        // Delegate user creation to usersRepository so secureStore is used consistently
-        // Self-registered users get 'doctor' role; an admin can change it later
-        return await usersRepository.selfRegister({ fullName, email, password });
+        // Delegate user creation to usersRepository.
+        // selfRegister now returns a sanitized user (no session) — account is pending approval.
+        const user = await usersRepository.selfRegister({ fullName, email, password });
+        return { user, pending: true };
     }
 
     logout() {

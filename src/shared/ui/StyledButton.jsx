@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
-export const StyledButton = styled.button`
+export const StyledButton = styled.button.withConfig({
+    shouldForwardProp: (prop) => !['variant', 'size'].includes(prop),
+})`
   padding: ${(props) => props.size === 'large' ? '12px 32px' : '8px 24px'};
   font-size: ${(props) => props.size === 'large' ? '1.1rem' : '0.95rem'};
   font-weight: 600;

@@ -9,6 +9,7 @@ import { ErrorPage } from '../pages/ErrorPage';
 const LandingPage = lazy(() => import('../../features/landing/pages/LandingPage').then(module => ({ default: module.LandingPage })));
 const SignInPage = lazy(() => import('../../features/auth/pages/SignInPage').then(module => ({ default: module.SignInPage })));
 const SignUpPage = lazy(() => import('../../features/auth/pages/SignUpPage').then(module => ({ default: module.SignUpPage })));
+const SignUpPendingPage = lazy(() => import('../../features/auth/pages/SignUpPendingPage').then(module => ({ default: module.SignUpPendingPage })));
 const PatientsListPage = lazy(() => import('../../features/patients/pages/PatientsListPage').then(module => ({ default: module.PatientsListPage })));
 const PatientCreateEditPage = lazy(() => import('../../features/patients/pages/PatientCreateEditPage').then(module => ({ default: module.PatientCreateEditPage })));
 const PatientDetailsPage = lazy(() => import('../../features/patients/pages/PatientDetailsPage').then(module => ({ default: module.PatientDetailsPage })));
@@ -57,6 +58,14 @@ export const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<Loading />}>
                         <SignUpPage />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'signup/pending',
+                element: (
+                    <Suspense fallback={<Loading />}>
+                        <SignUpPendingPage />
                     </Suspense>
                 ),
             },

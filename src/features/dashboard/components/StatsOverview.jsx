@@ -75,7 +75,6 @@ export const StatsOverview = ({ stats }) => {
             value: stats.totalPatients,
             icon: PeopleIcon,
             color: '#2D9596',
-            trend: 8
         },
         {
             title: "Today's Appointments",
@@ -88,7 +87,6 @@ export const StatsOverview = ({ stats }) => {
             value: stats.newPatientsThisWeek,
             icon: TrendingUpIcon,
             color: '#388e3c',
-            trend: 12
         },
         {
             title: 'Completion Rate',

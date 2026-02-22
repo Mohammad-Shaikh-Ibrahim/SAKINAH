@@ -2,7 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { StyledButton } from '../../../shared/ui/StyledButton';
 
-const HeroWrapper = styled.section`
+const HeroWrapper = styled.section.withConfig({
+    shouldForwardProp: (prop) => prop !== 'bgImage',
+})`
   height: 100vh;
   width: 100%;
   position: relative;

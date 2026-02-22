@@ -30,6 +30,7 @@ const initialState = {
     loading: false,
     error: null,
     isInitialized: false,
+    pendingRegistration: false,
 };
 
 const authSlice = createSlice({
@@ -54,7 +55,10 @@ const authSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
-        }
+        },
+        clearPendingRegistration: (state) => {
+            state.pendingRegistration = false;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -73,16 +77,22 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-            // Register
+            // Register — account is now pending approval; no auto-login
             .addCase(registerUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.token;
-                state.isAuthenticated = true;
+                if (action.payload.pending) {
+                    // Account created but not active — redirect to pending page
+                    state.pendingRegistration = true;
+                } else {
+                    // Legacy path (admin-created users that are immediately active)
+                    state.user = action.payload.user;
+                    state.token = action.payload.token;
+                    state.isAuthenticated = true;
+                }
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -91,12 +101,13 @@ const authSlice = createSlice({
     },
 });
 
-export const { logout, initializeAuth, clearError } = authSlice.actions;
+export const { logout, initializeAuth, clearError, clearPendingRegistration } = authSlice.actions;
 
 export const selectAuth = (state) => state.auth;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectCurrentUser = (state) => state.auth.user;
 export const selectUserRole = (state) => state.auth.user?.role;
 export const selectUserPermissions = (state) => state.auth.user?.permissions || [];
+export const selectPendingRegistration = (state) => state.auth.pendingRegistration;
 
 export default authSlice.reducer;

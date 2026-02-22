@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
@@ -8,7 +8,8 @@ import {
     Link,
     Alert,
     FormControlLabel,
-    Checkbox
+    Checkbox,
+    Collapse,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { AuthLayout } from '../components/AuthLayout';
@@ -19,22 +20,23 @@ export const SignInPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { loading, error, isAuthenticated } = useSelector(selectAuth);
+    const [showForgotMsg, setShowForgotMsg] = useState(false);
 
-    const { control, handleSubmit } = useForm({
+    const { control, handleSubmit, watch } = useForm({
         mode: 'onBlur',
         defaultValues: {
             email: '',
             password: '',
-            remember: false
+            remember: false,
         }
     });
 
+    const remember = watch('remember');
+
     useEffect(() => {
-        // If already logged in, redirect to dashboard
         if (isAuthenticated) {
             navigate('/dashboard');
         }
-        // Clean up error on unmount
         return () => {
             dispatch(clearError());
         };
@@ -51,11 +53,22 @@ export const SignInPage = () => {
         >
             {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
+            <Collapse in={showForgotMsg}>
+                <Alert
+                    severity="info"
+                    onClose={() => setShowForgotMsg(false)}
+                    sx={{ mb: 3 }}
+                >
+                    Password reset is managed by your administrator. Please contact your clinic admin to reset your password.
+                </Alert>
+            </Collapse>
+
             <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                 <ControlledTextField
                     name="email"
                     control={control}
                     label="Email Address"
+                    type="email"
                     fullWidth
                     margin="normal"
                     autoComplete="email"
@@ -83,11 +96,31 @@ export const SignInPage = () => {
                 />
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary" />}
-                        label={<Typography variant="body2">Remember me</Typography>}
+                    <Controller
+                        name="remember"
+                        control={control}
+                        render={({ field }) => (
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        {...field}
+                                        checked={field.value}
+                                        color="primary"
+                                    />
+                                }
+                                label={<Typography variant="body2">Remember me</Typography>}
+                            />
+                        )}
                     />
-                    <Link variant="body2" underline="hover" sx={{ color: '#2D9596', cursor: 'pointer' }}>
+                    {/* Use component="button" so it's a focusable button, not a link — avoids form submit */}
+                    <Link
+                        component="button"
+                        type="button"
+                        variant="body2"
+                        underline="hover"
+                        onClick={() => setShowForgotMsg(true)}
+                        sx={{ color: '#2D9596' }}
+                    >
                         Forgot password?
                     </Link>
                 </Box>

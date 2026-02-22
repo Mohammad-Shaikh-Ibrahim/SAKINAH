@@ -11,12 +11,12 @@ import {
 import { LoadingButton } from '@mui/lab';
 import { AuthLayout } from '../components/AuthLayout';
 import { ControlledTextField } from '../../../shared/ui/ControlledTextField';
-import { registerUser, selectAuth, clearError } from '../store/authSlice';
+import { registerUser, selectAuth, clearError, clearPendingRegistration } from '../store/authSlice';
 
 export const SignUpPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { loading, error, isAuthenticated } = useSelector(selectAuth);
+    const { loading, error, isAuthenticated, pendingRegistration } = useSelector(selectAuth);
 
     const { control, handleSubmit, watch } = useForm({
         mode: 'onBlur',
@@ -31,13 +31,25 @@ export const SignUpPage = () => {
     const password = watch('password');
 
     useEffect(() => {
+        // Already logged in → go to dashboard
         if (isAuthenticated) {
             navigate('/dashboard');
         }
+    }, [isAuthenticated, navigate]);
+
+    useEffect(() => {
+        // Registration succeeded but account is pending approval
+        if (pendingRegistration) {
+            navigate('/signup/pending');
+        }
+    }, [pendingRegistration, navigate]);
+
+    useEffect(() => {
         return () => {
             dispatch(clearError());
+            dispatch(clearPendingRegistration());
         };
-    }, [isAuthenticated, navigate, dispatch]);
+    }, [dispatch]);
 
     const onSubmit = (data) => {
         dispatch(registerUser(data));
@@ -58,6 +70,7 @@ export const SignUpPage = () => {
                     fullWidth
                     margin="normal"
                     autoFocus
+                    autoComplete="name"
                     rules={{
                         required: 'Full name is required',
                         minLength: { value: 3, message: 'Name too short' }
@@ -68,6 +81,7 @@ export const SignUpPage = () => {
                     name="email"
                     control={control}
                     label="Email Address"
+                    type="email"
                     fullWidth
                     margin="normal"
                     autoComplete="email"
@@ -90,7 +104,12 @@ export const SignUpPage = () => {
                     autoComplete="new-password"
                     rules={{
                         required: 'Password is required',
-                        minLength: { value: 6, message: 'Password must be at least 6 characters' }
+                        minLength: { value: 8, message: 'Password must be at least 8 characters' },
+                        validate: {
+                            hasUpper:   v => /[A-Z]/.test(v)        || 'Must contain an uppercase letter',
+                            hasNumber:  v => /[0-9]/.test(v)        || 'Must contain a number',
+                            hasSpecial: v => /[^A-Za-z0-9]/.test(v) || 'Must contain a special character (e.g. !@#$)',
+                        }
                     }}
                 />
 
@@ -101,6 +120,7 @@ export const SignUpPage = () => {
                     type="password"
                     fullWidth
                     margin="normal"
+                    autoComplete="new-password"
                     rules={{
                         required: 'Please confirm your password',
                         validate: (value) => value === password || 'Passwords do not match'

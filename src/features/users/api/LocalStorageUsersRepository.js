@@ -84,8 +84,10 @@ class LocalStorageUsersRepository {
             email: email.toLowerCase(),
             password, // TODO: Replace with hashed password (bcrypt) when backend is available
             fullName,
-            role: 'doctor', // Default role for self-registration; admin can adjust later
-            isActive: true,
+            // SECURITY: Self-registered accounts are pending review — admin must activate
+            // and assign the correct role before the user can log in.
+            role: 'pending',
+            isActive: false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             createdBy: null,
@@ -97,7 +99,8 @@ class LocalStorageUsersRepository {
         users.push(newUser);
         this._saveUsers(users);
 
-        return this.authenticate(email, password);
+        // Do NOT auto-authenticate — account requires admin approval first.
+        return this._sanitizeUser(newUser);
     }
 
     async createUser(userData, adminUserId) {
@@ -424,7 +427,7 @@ class LocalStorageUsersRepository {
         sessionStorage.removeItem(`sakinah_rate_limit_${email.toLowerCase()}`);
     }
 
-    async authenticate(email, password) {
+    async authenticate(email, password, rememberMe = false) {
         // Rate-limit check (client-side guard; enforce server-side in production)
         this._checkRateLimit(email);
 
@@ -485,7 +488,7 @@ class LocalStorageUsersRepository {
                 permissions,
             },
             token: `mock-jwt-token-${user.id}-${Date.now()}`,
-            expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+            expiresAt: Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000,
         };
 
         secureStore.setItem(SESSION_KEY, session);
