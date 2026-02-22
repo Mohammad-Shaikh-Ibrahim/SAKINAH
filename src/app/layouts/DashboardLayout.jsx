@@ -26,6 +26,8 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
+import PeopleIcon from '@mui/icons-material/People';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ConfirmModal } from '../../shared/ui/ConfirmModal';
 import { usePermissions, ROLE_COLORS } from '../../features/users';
@@ -75,7 +77,8 @@ export const DashboardLayout = () => {
         navigate('/dashboard/profile');
     };
 
-    // Build navigation items based on permissions
+    // Clinical navigation — identical for all roles.
+    // Admin-only tools (Users, Audit Logs) live in the profile dropdown.
     const navItems = useMemo(() => {
         const items = [
             { label: 'Dashboard', path: '/dashboard', permission: null },
@@ -93,18 +96,13 @@ export const DashboardLayout = () => {
             items.push({ label: 'Prescriptions', path: '/dashboard/prescriptions', permission: 'prescriptions.read' });
         }
 
-        if (hasPermission('users.read')) {
-            items.push({ label: 'Users', path: '/dashboard/users', permission: 'users.read' });
-        }
-
-        if (hasPermission('audit.read')) {
-            items.push({ label: 'Audit Logs', path: '/dashboard/audit-logs', permission: 'audit.read' });
-        }
-
         return items;
     }, [hasPermission]);
 
     const roleColors = ROLE_COLORS[userRole] || { bg: '#e0e0e0', color: '#616161' };
+
+    const isUsersActive     = location.pathname.startsWith('/dashboard/users');
+    const isAuditActive     = location.pathname.startsWith('/dashboard/audit-logs');
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -153,7 +151,7 @@ export const DashboardLayout = () => {
                             </IconButton>
                         </Box>
 
-                        {/* Desktop Nav */}
+                        {/* Desktop Nav — clinical items only */}
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 1 }}>
                             {navItems.map((item) => {
                                 const isActive = location.pathname === item.path ||
@@ -220,6 +218,7 @@ export const DashboardLayout = () => {
                                     />
                                 </Box>
                             </Button>
+
                             <Menu
                                 anchorEl={userMenuAnchor}
                                 open={Boolean(userMenuAnchor)}
@@ -227,13 +226,40 @@ export const DashboardLayout = () => {
                                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                             >
+                                {/* My Profile — always visible */}
                                 <MenuItem onClick={handleProfileClick}>
-                                    <PersonIcon sx={{ mr: 1 }} fontSize="small" />
+                                    <PersonIcon fontSize="small" sx={{ mr: 1 }} />
                                     My Profile
                                 </MenuItem>
+
+                                {/* Admin-only tools */}
+                                {isAdmin && <Divider />}
+                                {isAdmin && (
+                                    <MenuItem
+                                        component={RouterLink}
+                                        to="/dashboard/users"
+                                        onClick={handleUserMenuClose}
+                                        sx={{ color: isUsersActive ? '#009688' : 'inherit' }}
+                                    >
+                                        <PeopleIcon fontSize="small" sx={{ mr: 1 }} />
+                                        User Management
+                                    </MenuItem>
+                                )}
+                                {isAdmin && (
+                                    <MenuItem
+                                        component={RouterLink}
+                                        to="/dashboard/audit-logs"
+                                        onClick={handleUserMenuClose}
+                                        sx={{ color: isAuditActive ? '#009688' : 'inherit' }}
+                                    >
+                                        <AssignmentIcon fontSize="small" sx={{ mr: 1 }} />
+                                        Audit Logs
+                                    </MenuItem>
+                                )}
+
                                 <Divider />
                                 <MenuItem onClick={handleLogoutClick} sx={{ color: 'error.main' }}>
-                                    <LogoutIcon sx={{ mr: 1 }} fontSize="small" />
+                                    <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
                                     Logout
                                 </MenuItem>
                             </Menu>
@@ -288,6 +314,8 @@ export const DashboardLayout = () => {
                     </Box>
                 </Box>
                 <Divider />
+
+                {/* Clinical nav items */}
                 <List>
                     {navItems.map((item) => {
                         const isActive = location.pathname === item.path ||
@@ -307,6 +335,8 @@ export const DashboardLayout = () => {
                     })}
                 </List>
                 <Divider />
+
+                {/* Account & admin tools */}
                 <List>
                     <ListItem disablePadding>
                         <ListItemButton
@@ -318,6 +348,36 @@ export const DashboardLayout = () => {
                             <ListItemText primary="My Profile" />
                         </ListItemButton>
                     </ListItem>
+
+                    {isAdmin && (
+                        <ListItem disablePadding>
+                            <ListItemButton
+                                component={RouterLink}
+                                to="/dashboard/users"
+                                selected={isUsersActive}
+                                onClick={handleDrawerToggle}
+                            >
+                                <PeopleIcon sx={{ mr: 2 }} />
+                                <ListItemText primary="User Management" />
+                            </ListItemButton>
+                        </ListItem>
+                    )}
+
+                    {isAdmin && (
+                        <ListItem disablePadding>
+                            <ListItemButton
+                                component={RouterLink}
+                                to="/dashboard/audit-logs"
+                                selected={isAuditActive}
+                                onClick={handleDrawerToggle}
+                            >
+                                <AssignmentIcon sx={{ mr: 2 }} />
+                                <ListItemText primary="Audit Logs" />
+                            </ListItemButton>
+                        </ListItem>
+                    )}
+
+                    <Divider />
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogoutClick} sx={{ color: 'error.main' }}>
                             <LogoutIcon sx={{ mr: 2 }} />
