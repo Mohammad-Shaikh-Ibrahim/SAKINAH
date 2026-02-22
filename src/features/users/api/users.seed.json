@@ -4,7 +4,7 @@
       "id": "user-001",
       "email": "admin@sakinah.com",
       "password": "Admin123!",
-      "fullName": "Dr. Sarah Administrator",
+      "fullName": "Administrator",
       "role": "admin",
       "isActive": true,
       "createdAt": "2026-01-01T00:00:00Z",
