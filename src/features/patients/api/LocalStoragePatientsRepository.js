@@ -1,72 +1,55 @@
+import { BaseRepository } from '../../../shared/api/BaseRepository';
 import seedData from './patients.seed.json';
-import { secureStore } from '../../../shared/utils/secureStore';
+import { prescriptionsRepository } from '../../prescriptions/api/LocalStoragePrescriptionsRepository';
 import { logger } from '../../../shared/utils/logger';
 
-const STORAGE_KEY = 'patients_db_v1';
-
-// Helper to simulate network delay
-const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
-
-class LocalStoragePatientsRepository {
+class LocalStoragePatientsRepository extends BaseRepository {
     constructor() {
+        super('patients_db_v1', { idPrefix: 'p' });
         this.init();
     }
 
     async init() {
-        const existing = secureStore.getItem(STORAGE_KEY);
-        if (!existing) {
+        await this.ensureInitialized();
+        if (this._cache.size === 0) {
             logger.info('Seeding Patients Database (Encrypted)');
-            secureStore.setItem(STORAGE_KEY, seedData);
+            seedData.forEach(p => this._cache.set(p.id, p));
+            this._persist();
         }
     }
 
-    _getAll() {
-        return secureStore.getItem(STORAGE_KEY) || [];
-    }
-
-    _save(data) {
-        secureStore.setItem(STORAGE_KEY, data);
-    }
-
     async getAll({ userId, search = '', page = 1, limit = 10, sort = 'desc' } = {}) {
-        await delay();
-        let patients = this._getAll();
+        await this.ensureInitialized();
+        let patients = Array.from(this._cache.values());
 
         // Filter by owner
         if (userId) {
             patients = patients.filter(p => p && p.createdBy === userId);
         }
 
-        // Filter
+        // Search (O(N) search is acceptable for 1k-10k names, but we minimize iterations)
         if (search) {
             const lowerSearch = search.toLowerCase();
-            patients = patients.filter(
-                (p) => {
-                    if (!p) return false;
-                    const fName = String(p.firstName || '').toLowerCase();
-                    const lName = String(p.lastName || '').toLowerCase();
-                    const phone = String(p.phone || '');
-                    return fName.includes(lowerSearch) || lName.includes(lowerSearch) || phone.includes(search);
-                }
-            );
+            patients = patients.filter((p) => {
+                if (!p) return false;
+                return String(p.firstName || '').toLowerCase().includes(lowerSearch) ||
+                    String(p.lastName || '').toLowerCase().includes(lowerSearch) ||
+                    String(p.phone || '').includes(search);
+            });
         }
 
-        // Sort (by createdAt default)
+        // Sort
         patients.sort((a, b) => {
-            if (!a || !b) return 0;
             const dateA = new Date(a.createdAt || 0);
             const dateB = new Date(b.createdAt || 0);
-            return sort === 'asc' ? dateA - dateB : dateB - dateA; // Descending default
+            return sort === 'asc' ? dateA - dateB : dateB - dateA;
         });
 
         // Pagination
         const total = patients.length;
         const start = (page - 1) * limit;
-        const end = start + limit;
-        const data = patients.slice(start, end);
-
         return {
-            data,
+            data: patients.slice(start, start + limit),
             total,
             page,
             limit,
@@ -74,75 +57,27 @@ class LocalStoragePatientsRepository {
         };
     }
 
-    async getById(id, userId) {
-        await delay();
-        const patients = this._getAll();
-        const patient = patients.find((p) => p.id === id);
-        if (!patient) throw new Error('Patient not found');
-
-        // Access check
-        if (userId && patient.createdBy !== userId) {
-            throw new Error('Access denied');
-        }
-
-        return patient;
-    }
-
-    async create(patientData, userId) {
-        await delay(800);
-        const patients = this._getAll();
-
-        const newPatient = {
-            id: `p-${uuidv4()}`,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            createdBy: userId, // Associate with user
-            ...patientData,
-            complaints: patientData.complaints || [],
-        };
-
-        patients.unshift(newPatient); // Add to top
-        this._save(patients);
-        return newPatient;
-    }
-
-    async update(id, updates, userId) {
-        await delay(800);
-        const patients = this._getAll();
-        const index = patients.findIndex((p) => p.id === id);
-
-        if (index === -1) throw new Error('Patient not found');
-
-        // Access check
-        if (userId && patients[index].createdBy !== userId) {
-            throw new Error('Access denied');
-        }
-
-        const updatedPatient = {
-            ...patients[index],
-            ...updates,
-            updatedAt: new Date().toISOString(),
-        };
-
-        patients[index] = updatedPatient;
-        this._save(patients);
-        return updatedPatient;
-    }
-
+    /**
+     * Override delete to include Referential Integrity (Cascade Delete)
+     */
     async delete(id, userId) {
-        await delay(600);
-        let patients = this._getAll();
-        const patient = patients.find((p) => p.id === id);
-        if (!patient) throw new Error('Patient not found');
+        const patient = await this.getById(id);
 
-        // Access check
+        // Authorization check
         if (userId && patient.createdBy !== userId) {
             throw new Error('Access denied');
         }
 
-        patients = patients.filter((p) => p.id !== id);
-        this._save(patients);
-        return { id, success: true };
+        // [ENTERPRISE HARIDENING]: Referential Integrity
+        // 1. Delete associated prescriptions
+        const prescriptions = await prescriptionsRepository.getPrescriptionsByPatient(id);
+        for (const rx of prescriptions) {
+            await prescriptionsRepository.delete(rx.id);
+        }
+        logger.info(`Cascaded deletion: Removed ${prescriptions.length} prescriptions for patient ${id}`);
+
+        // 2. Delete the patient
+        return super.delete(id);
     }
 }
 

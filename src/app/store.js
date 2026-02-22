@@ -7,5 +7,5 @@ export const store = configureStore({
         ui: uiReducer,
         auth: authReducer,
     },
-    devTools: process.env.NODE_ENV !== 'production',
+    devTools: !import.meta.env.PROD,
 });

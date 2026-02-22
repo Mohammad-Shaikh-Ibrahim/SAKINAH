@@ -39,20 +39,20 @@ const PermissionGuard = ({
 }) => {
     const { hasPermission, hasAnyPermission, hasAllPermissions } = usePermissions();
 
-    // Determine if user has required permissions
+    // [ENTERPRISE HARDENING]: Fail-Close (Default to False)
     let hasAccess = false;
 
     if (permission) {
-        // Single permission check
         hasAccess = hasPermission(permission);
     } else if (permissions.length > 0) {
-        // Multiple permissions check
         hasAccess = requireAll
             ? hasAllPermissions(permissions)
             : hasAnyPermission(permissions);
     } else {
-        // No permissions specified, allow access
-        hasAccess = true;
+        // No permissions specified - in a security-first app, this should be an error or denied access.
+        // We deny access and log it.
+        console.warn('PermissionGuard used without specifying permissions. Access denied by default.');
+        hasAccess = false;
     }
 
     if (hasAccess) {
@@ -116,7 +116,8 @@ export const RoleGuard = ({
 }) => {
     const { userRole } = usePermissions();
 
-    const hasAccess = roles.includes(userRole);
+    // Fail close if no roles provided or role mismatch
+    const hasAccess = roles.length > 0 && roles.includes(userRole);
 
     if (hasAccess) {
         return <>{children}</>;

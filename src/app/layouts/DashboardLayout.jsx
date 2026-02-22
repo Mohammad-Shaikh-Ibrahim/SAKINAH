@@ -28,7 +28,6 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ConfirmModal } from '../../shared/ui/ConfirmModal';
-import { ConfirmModal } from '../../shared/ui/ConfirmModal';
 import { usePermissions, ROLE_COLORS } from '../../features/users';
 
 export const DashboardLayout = () => {

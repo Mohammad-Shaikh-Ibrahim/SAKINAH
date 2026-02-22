@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
-import { logoutAction as logout, selectCurrentUser } from '../../features/auth';
+import { logoutAction as logout, selectCurrentUser, selectAuth } from '../../features/auth';
 import { Box, CircularProgress } from '@mui/material';
 import { usePermissions } from '../../features/users';
 

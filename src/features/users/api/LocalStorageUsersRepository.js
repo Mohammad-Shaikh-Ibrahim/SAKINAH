@@ -1,6 +1,8 @@
+import { v4 as uuidv4 } from 'uuid';
 import { getRolePermissions, ROLE_DEFINITIONS } from '../model/roles';
 import { secureStore } from '../../../shared/utils/secureStore';
 import { logger } from '../../../shared/utils/logger';
+import seedData from './users.seed.json';
 
 const USERS_KEY = 'sakinah_users_db_v2';
 const PATIENT_ACCESS_KEY = 'sakinah_patient_access_v1';
@@ -64,6 +66,39 @@ class LocalStorageUsersRepository {
     // =====================
     // USER CRUD OPERATIONS
     // =====================
+
+    // =====================
+    // SELF-REGISTRATION (Public sign-up path)
+    // =====================
+
+    async selfRegister({ fullName, email, password }) {
+        await delay();
+        const users = this._getUsers();
+
+        if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+            throw new Error('Email already registered');
+        }
+
+        const newUser = {
+            id: `user-${uuidv4().slice(0, 8)}`,
+            email: email.toLowerCase(),
+            password, // TODO: Replace with hashed password (bcrypt) when backend is available
+            fullName,
+            role: 'doctor', // Default role for self-registration; admin can adjust later
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: null,
+            lastLogin: null,
+            profile: { title: '', specialization: '', licenseNumber: '', phone: '', avatar: null },
+            settings: { emailNotifications: true, theme: 'light', language: 'en' },
+        };
+
+        users.push(newUser);
+        this._saveUsers(users);
+
+        return this.authenticate(email, password);
+    }
 
     async createUser(userData, adminUserId) {
         await delay();
@@ -358,21 +393,58 @@ class LocalStorageUsersRepository {
     // AUTHENTICATION
     // =====================
 
+    /**
+     * Simple in-memory brute-force guard.
+     * In production, this must be enforced server-side.
+     */
+    _checkRateLimit(email) {
+        const RATE_LIMIT_KEY = `sakinah_rate_limit_${email.toLowerCase()}`;
+        const now = Date.now();
+        const WINDOW_MS = 15 * 60 * 1000; // 15-minute window
+        const MAX_ATTEMPTS = 5;
+
+        const record = JSON.parse(sessionStorage.getItem(RATE_LIMIT_KEY) || '{"count":0,"windowStart":0}');
+
+        if (now - record.windowStart > WINDOW_MS) {
+            // Reset window
+            record.count = 0;
+            record.windowStart = now;
+        }
+
+        if (record.count >= MAX_ATTEMPTS) {
+            const remaining = Math.ceil((WINDOW_MS - (now - record.windowStart)) / 60000);
+            throw new Error(`Too many failed login attempts. Please try again in ${remaining} minute(s).`);
+        }
+
+        record.count += 1;
+        sessionStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(record));
+    }
+
+    _clearRateLimit(email) {
+        sessionStorage.removeItem(`sakinah_rate_limit_${email.toLowerCase()}`);
+    }
+
     async authenticate(email, password) {
+        // Rate-limit check (client-side guard; enforce server-side in production)
+        this._checkRateLimit(email);
+
         await delay();
         const users = this._getUsers();
-        const user = users.find(
-            u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-        );
 
-        if (!user) {
-            // Log failed attempt
+        // Find user by email first (timing-safe: avoid revealing whether email exists)
+        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+        // Validate password separately — always compare in constant time
+        const isPasswordValid = user && user.password === password;
+
+        if (!user || !isPasswordValid) {
             await this.logAction({
                 userId: null,
                 action: 'login',
                 resource: 'auth',
                 resourceId: null,
-                resourceName: email,
+                // Do NOT log the raw email in resourceName — use a generic label
+                resourceName: 'unknown',
                 details: 'Failed login attempt - invalid credentials',
                 isSuccess: false,
             });
@@ -391,6 +463,9 @@ class LocalStorageUsersRepository {
             });
             throw new Error('Your account has been deactivated. Please contact an administrator.');
         }
+
+        // Successful auth — clear rate-limit counter
+        this._clearRateLimit(email);
 
         // Update last login
         const userIndex = users.findIndex(u => u.id === user.id);
@@ -413,7 +488,7 @@ class LocalStorageUsersRepository {
             expiresAt: Date.now() + 24 * 60 * 60 * 1000,
         };
 
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        secureStore.setItem(SESSION_KEY, session);
 
         // Log successful login
         await this.logAction({

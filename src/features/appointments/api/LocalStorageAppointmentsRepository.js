@@ -1,123 +1,83 @@
 import { v4 as uuidv4 } from 'uuid';
+import { BaseRepository } from '../../../shared/api/BaseRepository';
 import seedData from './appointments.seed.json';
+import { secureStore } from '../../../shared/utils/secureStore';
+import { logger } from '../../../shared/utils/logger';
 
-const STORAGE_KEY = 'appointments_db_v1';
 const AVAILABILITY_KEY = 'doctor_availability_db_v1';
 const TIME_OFF_KEY = 'time_off_db_v1';
 
-const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
-
-class LocalStorageAppointmentsRepository {
+class LocalStorageAppointmentsRepository extends BaseRepository {
     constructor() {
+        super('appointments_db_v1', { idPrefix: 'apt' });
         this.init();
     }
 
     async init() {
-        if (!localStorage.getItem(STORAGE_KEY)) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData.appointments || []));
+        await this.ensureInitialized();
+        if (this._cache.size === 0) {
+            logger.info('Seeding Appointments Database (Encrypted)');
+            (seedData.appointments || []).forEach(apt => this._cache.set(apt.id, apt));
+            this._persist();
         }
-        if (!localStorage.getItem(AVAILABILITY_KEY)) {
-            localStorage.setItem(AVAILABILITY_KEY, JSON.stringify(seedData.doctorAvailability || []));
+
+        // Secondary DBs (availability/time-off) 
+        if (!secureStore.getItem(AVAILABILITY_KEY)) {
+            secureStore.setItem(AVAILABILITY_KEY, seedData.doctorAvailability || []);
         }
-        if (!localStorage.getItem(TIME_OFF_KEY)) {
-            localStorage.setItem(TIME_OFF_KEY, JSON.stringify(seedData.timeOffBlocks || []));
+        if (!secureStore.getItem(TIME_OFF_KEY)) {
+            secureStore.setItem(TIME_OFF_KEY, seedData.timeOffBlocks || []);
         }
     }
 
-    _getData(key) {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : [];
-    }
+    // --- Helpers ---
+    _getSecondaryData(key) { return secureStore.getItem(key) || []; }
+    _saveSecondaryData(key, data) { secureStore.setItem(key, data); }
 
-    _saveData(key, data) {
-        localStorage.setItem(key, JSON.stringify(data));
-    }
-
-    // --- Appointments ---
+    // --- Optimized CRUD ---
 
     async getAppointmentsByDateRange(startDate, endDate, userId) {
-        await delay();
-        const appointments = this._getData(STORAGE_KEY);
-        return appointments.filter(apt =>
+        await this.ensureInitialized();
+        return Array.from(this._cache.values()).filter(apt =>
             apt.doctorId === userId &&
             apt.appointmentDate >= startDate &&
             apt.appointmentDate <= endDate
         );
     }
 
-    async getAppointmentById(id, userId) {
-        await delay();
-        const appointments = this._getData(STORAGE_KEY);
-        const apt = appointments.find(a => a.id === id);
-        if (!apt) throw new Error('Appointment not found');
-        if (apt.doctorId !== userId) throw new Error('Access denied');
-        return apt;
-    }
-
     async createAppointment(appointmentData, userId) {
-        await delay(600);
-        const appointments = this._getData(STORAGE_KEY);
-
-        // Basic conflict check (this would be more thorough in a real app)
-        const conflict = await this.checkTimeSlotAvailability(
+        // checkTimeSlotAvailability returns TRUE when the slot is free, FALSE when there is a conflict
+        const isSlotAvailable = await this.checkTimeSlotAvailability(
             appointmentData.appointmentDate,
             appointmentData.startTime,
             appointmentData.endTime,
             userId
         );
 
-        if (!conflict) {
-            // In a real app we'd return conflicts for doctor to override
+        if (!isSlotAvailable) {
+            logger.warn(`Appointment conflict detected at ${appointmentData.startTime} on ${appointmentData.appointmentDate}`);
         }
 
-        const newAppointment = {
-            id: `apt-${uuidv4()}`,
-            doctorId: userId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            status: 'scheduled',
-            ...appointmentData
-        };
-
-        appointments.push(newAppointment);
-        this._saveData(STORAGE_KEY, appointments);
-        return newAppointment;
+        return this.create(appointmentData, { doctorId: userId, status: 'scheduled' });
     }
 
     async updateAppointment(id, updates, userId) {
-        await delay();
-        const appointments = this._getData(STORAGE_KEY);
-        const index = appointments.findIndex(a => a.id === id);
-        if (index === -1) throw new Error('Appointment not found');
-        if (appointments[index].doctorId !== userId) throw new Error('Access denied');
-
-        appointments[index] = {
-            ...appointments[index],
-            ...updates,
-            updatedAt: new Date().toISOString()
-        };
-
-        this._saveData(STORAGE_KEY, appointments);
-        return appointments[index];
+        const apt = await this.getById(id);
+        if (apt.doctorId !== userId) throw new Error('Access denied');
+        return this.update(id, updates);
     }
 
     async deleteAppointment(id, userId) {
-        await delay();
-        let appointments = this._getData(STORAGE_KEY);
-        const apt = appointments.find(a => a.id === id);
-        if (!apt) throw new Error('Appointment not found');
+        const apt = await this.getById(id);
         if (apt.doctorId !== userId) throw new Error('Access denied');
-
-        appointments = appointments.filter(a => a.id !== id);
-        this._saveData(STORAGE_KEY, appointments);
-        return { id, success: true };
+        return this.delete(id);
     }
 
     // --- Availability & Conflicts ---
 
     async checkTimeSlotAvailability(date, startTime, endTime, userId) {
-        const appointments = this._getData(STORAGE_KEY);
-        const conflicts = appointments.filter(apt =>
+        await this.ensureInitialized();
+        const conflicts = Array.from(this._cache.values()).filter(apt =>
             apt.doctorId === userId &&
             apt.appointmentDate === date &&
             apt.status !== 'cancelled' &&
@@ -129,44 +89,39 @@ class LocalStorageAppointmentsRepository {
     }
 
     async getDoctorAvailability(userId) {
-        await delay();
-        const allAvail = this._getData(AVAILABILITY_KEY);
+        const allAvail = this._getSecondaryData(AVAILABILITY_KEY);
         return allAvail.filter(a => a.doctorId === userId);
     }
 
     async setDoctorAvailability(availabilityData, userId) {
-        await delay();
-        let allAvail = this._getData(AVAILABILITY_KEY);
-        // Remove existing for this doctor and replace
+        let allAvail = this._getSecondaryData(AVAILABILITY_KEY);
         allAvail = allAvail.filter(a => a.doctorId !== userId);
 
         const newAvail = availabilityData.map(d => ({
-            id: uuidv4(),
+            id: `avail-${uuidv4().slice(0, 8)}`,
             doctorId: userId,
             ...d
         }));
 
         allAvail.push(...newAvail);
-        this._saveData(AVAILABILITY_KEY, allAvail);
+        this._saveSecondaryData(AVAILABILITY_KEY, allAvail);
         return newAvail;
     }
 
     async getTimeOffBlocks(userId) {
-        await delay();
-        const allTimeOff = this._getData(TIME_OFF_KEY);
+        const allTimeOff = this._getSecondaryData(TIME_OFF_KEY);
         return allTimeOff.filter(t => t.doctorId === userId);
     }
 
     async addTimeOffBlock(timeOffData, userId) {
-        await delay();
-        const allTimeOff = this._getData(TIME_OFF_KEY);
+        const allTimeOff = this._getSecondaryData(TIME_OFF_KEY);
         const newBlock = {
-            id: uuidv4(),
+            id: `toff-${uuidv4().slice(0, 8)}`,
             doctorId: userId,
             ...timeOffData
         };
         allTimeOff.push(newBlock);
-        this._saveData(TIME_OFF_KEY, allTimeOff);
+        this._saveSecondaryData(TIME_OFF_KEY, allTimeOff);
         return newBlock;
     }
 }

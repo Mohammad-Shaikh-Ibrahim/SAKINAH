@@ -1,58 +1,50 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Container, Typography, Box, Alert, Skeleton, Card, Avatar, Button } from '@mui/material';
 import { Helmet } from 'react-helmet-async';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { PrescriptionForm } from '../components/PrescriptionForm';
 import { useCreatePrescription } from '../hooks/usePrescriptions';
 import { usePatient } from '../../patients/api/usePatients';
+import { useEntityForm } from '../../../shared/hooks/useEntityForm';
+import { selectCurrentUser } from '../../auth/store/authSlice';
 
 export const PrescriptionCreateEditPage = () => {
     const { patientId: routePatientId } = useParams();
     const patientId = (routePatientId && routePatientId !== 'undefined' && routePatientId !== 'null') ? routePatientId : null;
     const navigate = useNavigate();
-    const createMutation = useCreatePrescription();
+    const currentUser = useSelector(selectCurrentUser);
 
-    // Fetch patient info (only if patientId exists)
-    const { data: patient, isLoading: isPatientLoading, isError } = usePatient(patientId);
+    // Fetch patient info for UI context
+    const { data: patient, isLoading: isPatientLoading, isError: isPatientError } = usePatient(patientId);
 
-    const handleSubmit = async (data) => {
-        try {
-            const finalPatientId = patientId || data.patientId;
-            if (!finalPatientId) {
-                console.error("No patient selected");
-                return;
-            }
+    const {
+        isEditMode,
+        entityData: prescription,
+        isFetching,
+        isSubmitting,
+        fetchError,
+        onSubmit
+    } = useEntityForm({
+        entityName: 'Prescription',
+        useCreateMutation: useCreatePrescription,
+        // useUpdateMutation: useUpdatePrescription, // Not implemented in MVP
+        redirectPath: patientId ? `/dashboard/patients/${patientId}` : '/dashboard/prescriptions'
+    });
 
-            const response = await createMutation.mutateAsync({
-                ...data,
-                patientId: finalPatientId,
-                doctorId: 'current-user-id' // TODO: Get from Auth
-            });
-            navigate(`/dashboard/prescriptions/${response.id}`);
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    // Only show loading state if we're actually fetching a patient
-    if (patientId && isPatientLoading) {
+    if (patientId && (isPatientLoading || isFetching)) {
         return (
             <Container maxWidth="xl" sx={{ mt: 4 }}>
-                <Box sx={{ mb: 4 }}>
-                    <Skeleton variant="text" width={200} height={40} />
-                    <Skeleton variant="text" width={300} height={24} />
-                </Box>
                 <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} />
             </Container>
         );
     }
 
-    // Only show error if we tried to fetch a specific patient and it failed
-    if (patientId && !isPatientLoading && (isError || !patient)) {
+    if (patientId && (isPatientError || !patient)) {
         return (
             <Container maxWidth="lg" sx={{ mt: 4 }}>
-                <Alert severity="error">Patient not found or failed to load. Please return to patients list.</Alert>
+                <Alert severity="error">Patient context lost. Please return to patients list.</Alert>
                 <Button sx={{ mt: 2 }} variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/dashboard/patients')}>
                     Back to Patients
                 </Button>
@@ -70,13 +62,7 @@ export const PrescriptionCreateEditPage = () => {
             <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
                 <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Button
-                            startIcon={<ArrowBackIcon />}
-                            onClick={() => navigate(-1)}
-                            size="small"
-                            color="inherit"
-                            sx={{ minWidth: 0, px: 1 }}
-                        />
+                        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} size="small" color="inherit" sx={{ minWidth: 0, px: 1 }} />
                         <Typography variant="h4" fontWeight="bold" color="primary">New Prescription</Typography>
                     </Box>
 
@@ -98,16 +84,10 @@ export const PrescriptionCreateEditPage = () => {
                 </Box>
             </Box>
 
-            {createMutation.isError && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                    Failed to save prescription. Please try again.
-                </Alert>
-            )}
-
             <PrescriptionForm
                 patientId={patientId}
-                onSubmit={handleSubmit}
-                isSubmitting={createMutation.isPending}
+                onSubmit={(data) => onSubmit({ ...data, patientId, doctorId: currentUser?.id })}
+                isSubmitting={isSubmitting}
                 onCancel={() => navigate(-1)}
             />
         </Container>

@@ -123,7 +123,7 @@ export const useMedicationSearch = (query) => {
     return useQuery({
         queryKey: PRESCRIPTION_KEYS.medicationSearch(query),
         queryFn: () => prescriptionsRepository.searchMedicationDatabase(query),
-        enabled: query.length > 2,
+        enabled: typeof query === 'string' && query.length > 2,
         staleTime: 5 * 60 * 1000,
     });
 };

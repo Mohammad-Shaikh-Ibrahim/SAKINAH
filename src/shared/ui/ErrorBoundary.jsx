@@ -49,7 +49,7 @@ export class ErrorBoundary extends React.Component {
                             <Button
                                 variant="contained"
                                 color="inherit"
-                                onClick={handleReset}
+                                onClick={this.handleReset}
                                 sx={{ color: 'error.main', fontWeight: 'bold' }}
                             >
                                 Reload Application

@@ -1,7 +1,7 @@
 // Public API for Prescriptions feature
 export { PrescriptionsListPage } from './pages/PrescriptionsListPage';
 export { PrescriptionDetailsPage } from './pages/PrescriptionDetailsPage';
-export { PrescriptionFormPage } from './pages/PrescriptionFormPage';
+export { PrescriptionCreateEditPage } from './pages/PrescriptionCreateEditPage';
 export {
     usePrescriptionsByPatient,
     useAllPrescriptions,

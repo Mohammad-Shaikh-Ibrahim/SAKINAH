@@ -22,7 +22,7 @@ export function usePatients({ search, page, limit, sort } = {}) {
         queryKey: patientKeys.list(userId, { search, page, limit, sort }),
         queryFn: () => patientsRepository.getAll({ userId, search, page, limit, sort }),
         enabled: !!userId,
-        keepPreviousData: true,
+        placeholderData: (previousData) => previousData, // v5 replacement for keepPreviousData
     });
 }
 
@@ -32,7 +32,7 @@ export function usePatient(id) {
 
     return useQuery({
         queryKey: patientKeys.detail(userId, id),
-        queryFn: () => patientsRepository.getById(id, userId),
+        queryFn: () => patientsRepository.getById(id),
         enabled: !!id && !!userId,
     });
 }
@@ -43,7 +43,8 @@ export function useCreatePatient() {
     const userId = user?.id;
 
     return useMutation({
-        mutationFn: (newPatient) => patientsRepository.create(newPatient, userId),
+        // BaseRepository.create(data, metadata) — pass createdBy in metadata
+        mutationFn: (newPatient) => patientsRepository.create(newPatient, { createdBy: userId }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: patientKeys.lists() });
         },
@@ -52,11 +53,10 @@ export function useCreatePatient() {
 
 export function useUpdatePatient() {
     const queryClient = useQueryClient();
-    const user = useSelector(selectCurrentUser);
-    const userId = user?.id;
 
     return useMutation({
-        mutationFn: ({ id, data }) => patientsRepository.update(id, data, userId),
+        // useEntityForm sends { id, updates } — align destructuring here
+        mutationFn: ({ id, updates }) => patientsRepository.update(id, updates),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: patientKeys.details() });
             queryClient.invalidateQueries({ queryKey: patientKeys.lists() });

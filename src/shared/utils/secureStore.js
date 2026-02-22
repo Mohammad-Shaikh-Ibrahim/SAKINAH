@@ -1,39 +1,48 @@
 /**
- * SecureStore - Architectural abstraction for encrypted persistence.
- * 
- * [SECURITY AUDIT FIX]: This addresses the High Severity risk of plaintext PII exposure.
- * In production: Replace logic with 'crypto-js' or 'Web Crypto API'.
- * Current implementation uses an obfuscation layer (Base64 + salt) to demonstrate 
- * the architectural pattern.
+ * SecureStore - Architectural abstraction for persistent storage.
+ *
+ * SECURITY WARNING: This implementation uses Base64 obfuscation, NOT real encryption.
+ * Base64 is trivially reversible. This is intentional for a localStorage-only demo.
+ *
+ * Before production deployment you MUST replace _encrypt/_decrypt with real encryption:
+ *   - Use the Web Crypto API (AES-GCM with a user-derived key via PBKDF2), OR
+ *   - Use the 'crypto-js' library with a proper secret, OR
+ *   - Move sensitive data to an authenticated backend (the correct long-term fix).
+ *
+ * All callers of this class are already isolated behind this interface, so swapping
+ * the implementation requires changing only this file.
  */
 
-const SECRET_SALT = 'sakinah_prod_v1_salt';
+// OBFUSCATION SALT — not a cryptographic secret; replace entirely when adding real crypto
+const OBFUSCATION_SALT = 'sakinah_dev_v1_salt';
 
 class SecureStore {
     /**
-     * Set encrypted item in localStorage
+     * Serialize and obfuscate a value before writing to localStorage.
      */
     setItem(key, value) {
         try {
             const stringValue = JSON.stringify(value);
-            const encrypted = this._encrypt(stringValue);
-            localStorage.setItem(key, encrypted);
+            const obfuscated = this._obfuscate(stringValue);
+            localStorage.setItem(key, obfuscated);
         } catch (e) {
-            console.error('SecureStore Error during write', e);
+            // Do not log the value itself — it may contain PII
+            console.error('[SecureStore] Write error for key:', key, e.name);
         }
     }
 
     /**
-     * Get decrypted item from localStorage
+     * Read and deserialize a value from localStorage.
      */
     getItem(key) {
         try {
-            const encrypted = localStorage.getItem(key);
-            if (!encrypted) return null;
-            const decrypted = this._decrypt(encrypted);
-            return JSON.parse(decrypted);
+            const raw = localStorage.getItem(key);
+            if (!raw) return null;
+            const deobfuscated = this._deobfuscate(raw);
+            if (deobfuscated === null) return null;
+            return JSON.parse(deobfuscated);
         } catch (e) {
-            console.error('SecureStore Error during read', e);
+            console.error('[SecureStore] Read error for key:', key, e.name);
             return null;
         }
     }
@@ -42,22 +51,21 @@ class SecureStore {
         localStorage.removeItem(key);
     }
 
-    /**
-     * Mock Encryption (Obfuscation for simulation)
-     * Demonstrates where the security logic resides without external heavy crypto libs 
-     * in the current environment context.
-     */
-    _encrypt(text) {
-        // Obfuscation: Base64(salt + text)
-        return btoa(SECRET_SALT + text);
+    /** @private */
+    _obfuscate(text) {
+        return btoa(OBFUSCATION_SALT + text);
     }
 
-    _decrypt(cipher) {
+    /** @private */
+    _deobfuscate(encoded) {
         try {
-            const raw = atob(cipher);
-            if (!raw.startsWith(SECRET_SALT)) throw new Error('Data tampering detected');
-            return raw.slice(SECRET_SALT.length);
-        } catch (e) {
+            const raw = atob(encoded);
+            if (!raw.startsWith(OBFUSCATION_SALT)) {
+                console.warn('[SecureStore] Integrity check failed — data may be tampered or from a different app version.');
+                return null;
+            }
+            return raw.slice(OBFUSCATION_SALT.length);
+        } catch {
             return null;
         }
     }

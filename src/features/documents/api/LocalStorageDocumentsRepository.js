@@ -104,6 +104,18 @@ class LocalStorageDocumentsRepository {
     }
 
     async uploadDocument({ file, patientId, userId, category, description, notes, tags = [] }) {
+        // Guard against localStorage quota exhaustion — 4 MB base64 limit per document
+        const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+            throw new Error(`File size exceeds the ${MAX_FILE_SIZE_BYTES / 1024 / 1024} MB limit.`);
+        }
+
+        // Validate category
+        const validCategoryIds = DOCUMENT_CATEGORIES.map(c => c.id);
+        if (!validCategoryIds.includes(category)) {
+            throw new Error(`Invalid document category: ${category}`);
+        }
+
         await delay(800);
 
         const base64Data = await fileToBase64(file);
