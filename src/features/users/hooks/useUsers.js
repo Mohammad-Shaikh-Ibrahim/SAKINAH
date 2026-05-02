@@ -134,6 +134,7 @@ export function useActivateUser() {
     });
 }
 
+
 // Admin-issued password reset
 export function useAdminResetPassword() {
     const currentUser = useSelector(selectCurrentUser);
@@ -141,6 +142,22 @@ export function useAdminResetPassword() {
     return useMutation({
         mutationFn: ({ userId, newPassword }) =>
             usersRepository.adminResetPassword(userId, newPassword, currentUser?.id),
+    });
+}
+
+// Count of users awaiting admin approval (isActive: false)
+export function usePendingApprovalsCount() {
+    const currentUser = useSelector(selectCurrentUser);
+
+    return useQuery({
+        queryKey: [...userKeys.lists(), 'pending-count'],
+        queryFn: async () => {
+            const result = await usersRepository.getAllUsers(currentUser?.id, { isActive: false, limit: 1 });
+            return result.total;
+        },
+        enabled: !!currentUser?.id && currentUser?.role === 'admin',
+        staleTime: 30 * 1000,
+        refetchInterval: 60 * 1000,
     });
 }
 

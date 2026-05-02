@@ -50,7 +50,7 @@ export const DashboardUserMenu = ({
         PaperProps={{ sx: { mt: 1, minWidth: 240, borderRadius: 2 } }}
     >
         {/* Identity header */}
-        <Box sx={{ px: 2, py: 1.5, bgcolor: 'grey.50', borderBottom: '1px solid', borderColor: 'divider', pointerEvents: 'none' }}>
+        <Box sx={{ px: 2, py: 1.5, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider', pointerEvents: 'none' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Avatar sx={{ width: 38, height: 38, bgcolor: 'primary.main', fontSize: '0.9rem', fontWeight: 700 }}>
                     {initials}

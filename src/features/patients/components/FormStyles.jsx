@@ -32,9 +32,9 @@ export const FormSection = styled(Paper)`
   padding: 24px;
   margin-bottom: 24px;
   border-radius: 12px;
-  border: 1px solid #e0e0e0; // divider color equivalent
+  border: 1px solid ${props => props.theme.palette.divider};
   box-shadow: none;
-  background-color: #fff;
+  background-color: ${props => props.theme.palette.background.paper};
 `;
 
 // Sticky Footer Wrapper
@@ -44,8 +44,8 @@ export const FormFooter = styled(Box)`
   left: 0;
   right: 0;
   padding: 16px 24px;
-  background-color: #fff;
-  border-top: 1px solid #e0e0e0;
+  background-color: ${props => props.theme.palette.background.paper};
+  border-top: 1px solid ${props => props.theme.palette.divider};
   display: flex;
   justify-content: flex-end;
   gap: 16px;

@@ -60,7 +60,7 @@ export const PrescriptionsListPage = () => {
 
             <TableContainer component={Paper} variant="outlined">
                 <Table>
-                    <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableHead sx={{ bgcolor: 'action.hover' }}>
                         <TableRow>
                             <TableCell>Date</TableCell>
                             <TableCell>Medications</TableCell>

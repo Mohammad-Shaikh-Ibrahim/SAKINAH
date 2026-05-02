@@ -87,7 +87,7 @@ export const ActiveMedicationsList = ({ patientId }) => {
             <Typography variant="h6" gutterBottom>Active Medications</Typography>
             <TableContainer component={Paper} variant="outlined">
                 <Table size="small">
-                    <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableHead sx={{ bgcolor: 'action.hover' }}>
                         <TableRow>
                             <TableCell>Medication</TableCell>
                             <TableCell>Dosage</TableCell>

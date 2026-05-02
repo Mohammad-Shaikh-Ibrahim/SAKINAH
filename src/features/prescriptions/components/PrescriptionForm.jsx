@@ -89,7 +89,7 @@ export const PrescriptionForm = ({
         <form onSubmit={handleSubmit(onSubmit)}>
             {/* Card 0: Patient Selection (Only if not provided) */}
             {!initialPatientId && (
-                <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0', borderRadius: 2, bgcolor: '#fff4e5' }}>
+                <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'warning.light', borderRadius: 2, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,171,0,0.07)' : '#fff4e5' }}>
                     <Typography variant="h6" gutterBottom color="warning.main" fontWeight="bold">Patient Selection</Typography>
                     <Divider sx={{ mb: 2 }} />
                     <Controller
@@ -105,7 +105,7 @@ export const PrescriptionForm = ({
                         )}
                     />
                     {selectedPatient && (
-                        <Box sx={{ mt: 2, p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid #ffe0b2', display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 1, border: '1px solid', borderColor: 'warning.light', display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Avatar sx={{ bgcolor: '#2D9596' }}>
                                 {String(selectedPatient.firstName || '').charAt(0)}
                                 {String(selectedPatient.lastName || '').charAt(0)}
@@ -124,7 +124,7 @@ export const PrescriptionForm = ({
             )}
 
             {/* Card 1: Clinical Details */}
-            <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0', borderRadius: 2 }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
                 <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">Clinical Details</Typography>
                 <Divider sx={{ mb: 2 }} />
                 <FormGrid>
@@ -158,7 +158,7 @@ export const PrescriptionForm = ({
             />
 
             {/* Card 2: Medications */}
-            <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0', borderRadius: 2, bgcolor: '#f8fbfb' }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2, bgcolor: 'action.hover' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h6" fontWeight="bold" color="primary">Medications</Typography>
                     <Button
@@ -320,7 +320,7 @@ export const PrescriptionForm = ({
             </Paper>
 
             {/* Card 3: Internal Notes */}
-            <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0', borderRadius: 2 }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
                 <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">Internal Notes</Typography>
                 <Divider sx={{ mb: 2 }} />
                 <ControlledTextField

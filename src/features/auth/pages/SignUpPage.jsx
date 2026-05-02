@@ -1,17 +1,28 @@
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
     Box,
     Typography,
     Link,
-    Alert
+    Alert,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel,
+    FormHelperText,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { AuthLayout } from '../components/AuthLayout';
 import { ControlledTextField } from '../../../shared/ui/ControlledTextField';
 import { registerUser, selectAuth, clearError, clearPendingRegistration } from '../store/authSlice';
+
+const ROLE_OPTIONS = [
+    { value: 'doctor',        label: 'Doctor' },
+    { value: 'nurse',         label: 'Nurse' },
+    { value: 'receptionist',  label: 'Receptionist' },
+];
 
 export const SignUpPage = () => {
     const dispatch = useDispatch();
@@ -24,24 +35,19 @@ export const SignUpPage = () => {
             fullName: '',
             email: '',
             password: '',
-            confirmPassword: ''
+            confirmPassword: '',
+            role: '',
         }
     });
 
     const password = watch('password');
 
     useEffect(() => {
-        // Already logged in → go to dashboard
-        if (isAuthenticated) {
-            navigate('/dashboard');
-        }
+        if (isAuthenticated) navigate('/dashboard');
     }, [isAuthenticated, navigate]);
 
     useEffect(() => {
-        // Registration succeeded but account is pending approval
-        if (pendingRegistration) {
-            navigate('/signup/pending');
-        }
+        if (pendingRegistration) navigate('/signup/pending');
     }, [pendingRegistration, navigate]);
 
     useEffect(() => {
@@ -93,6 +99,33 @@ export const SignUpPage = () => {
                         }
                     }}
                 />
+
+                <Controller
+                    name="role"
+                    control={control}
+                    rules={{ required: 'Please select your role' }}
+                    render={({ field, fieldState }) => (
+                        <FormControl fullWidth margin="normal" error={!!fieldState.error}>
+                            <InputLabel id="role-label">Role</InputLabel>
+                            <Select
+                                {...field}
+                                labelId="role-label"
+                                label="Role"
+                            >
+                                {ROLE_OPTIONS.map(opt => (
+                                    <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                                ))}
+                            </Select>
+                            {fieldState.error && (
+                                <FormHelperText>{fieldState.error.message}</FormHelperText>
+                            )}
+                        </FormControl>
+                    )}
+                />
+
+                <Alert severity="info" sx={{ mt: 1, mb: 1, py: 0.5, fontSize: '0.8rem' }}>
+                    All new accounts require admin approval before you can sign in.
+                </Alert>
 
                 <ControlledTextField
                     name="password"

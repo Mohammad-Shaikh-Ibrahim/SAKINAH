@@ -5,6 +5,7 @@ import { logoutAction as logout, selectCurrentUser } from '../../features/auth';
 import { Box, Container, Typography } from '@mui/material';
 import { ConfirmModal } from '../../shared/ui/ConfirmModal';
 import { usePermissions, ROLE_COLORS } from '../../features/users';
+import { usePendingApprovalsCount } from '../../features/users/hooks/useUsers';
 import { ReportIssueModal } from '../../features/help/components/ReportIssueModal';
 import { DashboardNavbar } from './DashboardNavbar';
 import { DashboardDrawer } from './DashboardDrawer';
@@ -21,6 +22,7 @@ export const DashboardLayout = () => {
     const [reportOpen, setReportOpen] = useState(false);
 
     const { hasPermission, isAdmin, userRole } = usePermissions();
+    const { data: pendingCount = 0 } = usePendingApprovalsCount();
 
     const initials = user?.fullName
         ? user.fullName.split(' ').map(n => n[0]).slice(0, 2).join('')
@@ -75,6 +77,7 @@ export const DashboardLayout = () => {
                 onUserMenuOpen={(e) => setUserMenuAnchor(e.currentTarget)}
                 onUserMenuClose={() => setUserMenuAnchor(null)}
                 onProfileClick={handleProfileClick}
+                pendingCount={pendingCount}
             />
 
             <DashboardDrawer

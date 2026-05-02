@@ -112,7 +112,7 @@ export const PrescriptionDetailsPage = () => {
     return (
         <Box>
             {/* Main UI - Hidden on Print */}
-            <Box className="no-print" sx={{ display: 'block', displayPrint: 'none', bgcolor: '#f4f6f8', minHeight: '100vh', pb: 8 }}>
+            <Box className="no-print" sx={{ display: 'block', displayPrint: 'none', bgcolor: 'background.default', minHeight: '100vh', pb: 8 }}>
                 <Container maxWidth="xl" sx={{ py: 4 }}>
                     <Helmet>
                         <title>Prescription Details | SAKINAH</title>
@@ -121,7 +121,7 @@ export const PrescriptionDetailsPage = () => {
                     {/* Header */}
                     <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <IconButton onClick={() => navigate(-1)} sx={{ bgcolor: 'white', border: '1px solid #e0e0e0' }}>
+                            <IconButton onClick={() => navigate(-1)} sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
                                 <ArrowBackIcon />
                             </IconButton>
                             <Box>
@@ -289,7 +289,7 @@ export const PrescriptionDetailsPage = () => {
                                                     <Divider sx={{ borderStyle: 'dashed' }} />
                                                     <Box>
                                                         <Typography variant="caption" fontWeight="bold" color="text.secondary">INSTRUCTIONS</Typography>
-                                                        <Typography variant="body2" sx={{ mt: 0.5, fontStyle: 'italic', bgcolor: '#fff8e1', p: 1, borderRadius: 1 }}>
+                                                        <Typography variant="body2" sx={{ mt: 0.5, fontStyle: 'italic', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,171,0,0.07)' : '#fff8e1', p: 1, borderRadius: 1 }}>
                                                             "{med.instructions || 'Use as directed'}"
                                                         </Typography>
                                                     </Box>
@@ -314,7 +314,7 @@ export const PrescriptionDetailsPage = () => {
                         {/* RIGHT COLUMN: Patient & Notes */}
                         <Box>
                             {/* Patient Card */}
-                            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 3, border: '1px solid #eef2f6', bgcolor: 'white' }}>
+                            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
                                 <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <PersonIcon color="primary" /> Patient Details
                                 </Typography>
@@ -345,11 +345,11 @@ export const PrescriptionDetailsPage = () => {
                                         <Chip label={`ID: ${String(patient.id || '').slice(0, 8)}`} size="small" sx={{ mt: 1 }} />
 
                                         <Stack spacing={2} sx={{ mt: 3, textAlign: 'left' }}>
-                                            <Box sx={{ p: 2, bgcolor: '#fafafa', borderRadius: 2 }}>
+                                            <Box sx={{ p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
                                                 <Typography variant="caption" color="text.secondary">PHONE</Typography>
                                                 <Typography variant="body2" fontWeight="medium">{String(patient.phone || 'No phone')}</Typography>
                                             </Box>
-                                            <Box sx={{ p: 2, bgcolor: '#fafafa', borderRadius: 2 }}>
+                                            <Box sx={{ p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
                                                 <Typography variant="caption" color="text.secondary">ADDRESS</Typography>
                                                 <Typography variant="body2" fontWeight="medium">{String(patient.address || 'No address')}</Typography>
                                             </Box>
@@ -361,12 +361,12 @@ export const PrescriptionDetailsPage = () => {
                             </Paper>
 
                             {/* Internal Notes */}
-                            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #fff3e0', bgcolor: '#fffbf5' }}>
-                                <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#e65100' }}>
+                            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'warning.light', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,171,0,0.07)' : '#fffbf5' }}>
+                                <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'warning.dark' }}>
                                     <NotesIcon /> Internal Notes
                                 </Typography>
-                                <Divider sx={{ mb: 2, borderColor: '#ffe0b2' }} />
-                                <Typography variant="body2" sx={{ color: '#5d4037', lineHeight: 1.6 }}>
+                                <Divider sx={{ mb: 2, borderColor: 'warning.light' }} />
+                                <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
                                     {prescription.notes || 'No internal notes recorded for this prescription.'}
                                 </Typography>
                             </Paper>

@@ -52,7 +52,7 @@ export const DashboardDrawer = ({
         </Box>
         <Divider />
 
-        <Box sx={{ px: 2, py: 1.5, bgcolor: 'grey.50' }}>
+        <Box sx={{ px: 2, py: 1.5, bgcolor: 'action.hover' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Avatar sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontSize: '0.9rem', fontWeight: 700 }}>
                     {initials}

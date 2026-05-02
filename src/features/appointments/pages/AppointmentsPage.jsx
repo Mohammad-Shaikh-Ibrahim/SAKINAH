@@ -126,7 +126,7 @@ export const AppointmentsPage = () => {
                         exclusive
                         onChange={handleDisplayModeChange}
                         size="small"
-                        sx={{ bgcolor: 'white' }}
+                        sx={{ bgcolor: 'background.paper' }}
                     >
                         <ToggleButton value="calendar">
                             <CalendarViewMonthIcon sx={{ mr: 1 }} /> Calendar

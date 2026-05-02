@@ -18,7 +18,7 @@ export const SignUpPendingPage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    bgcolor: '#f5f5f5',
+                    bgcolor: 'background.default',
                     px: 2,
                 }}
             >

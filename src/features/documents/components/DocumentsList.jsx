@@ -40,7 +40,7 @@ const DocumentCard = ({ doc, onView, onDelete }) => {
     return (
         <Card elevation={2} sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 2, transition: 'transform 0.15s, box-shadow 0.15s', '&:hover': { transform: 'translateY(-2px)', boxShadow: 6 } }}>
             <CardActionArea onClick={() => onView(doc.id)} sx={{ flex: 1 }}>
-                <Box sx={{ bgcolor: '#f5f5f5', height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px 8px 0 0' }}>
+                <Box sx={{ bgcolor: 'action.hover', height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px 8px 0 0' }}>
                     {doc.isImage && doc.thumbnailBase64 ? (
                         <img src={doc.thumbnailBase64} alt={doc.fileName} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px 8px 0 0' }} />
                     ) : (
@@ -81,7 +81,7 @@ const DocumentRow = ({ doc, onView, onDelete }) => {
     };
 
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5, px: 2, borderBottom: '1px solid #f0f0f0', '&:hover': { bgcolor: '#fafafa' } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5, px: 2, borderBottom: '1px solid', borderBottomColor: 'divider', '&:hover': { bgcolor: 'action.hover' } }}>
             <FileIcon fileType={doc.fileType} isImage={doc.isImage} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="body2" fontWeight="bold" noWrap>{doc.fileName}</Typography>
@@ -188,8 +188,8 @@ export const DocumentsList = ({ patientId, onView }) => {
             )}
 
             {!isLoading && docs.length > 0 && viewMode === 'list' && (
-                <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1, px: 2, bgcolor: '#f8f8f8', borderBottom: '1px solid #e0e0e0' }}>
+                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1, px: 2, bgcolor: 'action.hover', borderBottom: '1px solid', borderBottomColor: 'divider' }}>
                         <Typography variant="caption" fontWeight="bold" color="text.secondary" sx={{ flex: 1 }}>FILE NAME</Typography>
                         <Typography variant="caption" fontWeight="bold" color="text.secondary" sx={{ minWidth: 100 }}>CATEGORY</Typography>
                         <Typography variant="caption" fontWeight="bold" color="text.secondary" sx={{ minWidth: 60, textAlign: 'right' }}>SIZE</Typography>

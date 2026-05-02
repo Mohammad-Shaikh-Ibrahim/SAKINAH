@@ -19,7 +19,7 @@ export const PrescriptionDetailsModal = ({ open, onClose, prescription, patient 
                     <CloseIcon />
                 </IconButton>
 
-                <Box sx={{ p: 3, bgcolor: '#f8fbfb', borderBottom: '1px solid #eee' }}>
+                <Box sx={{ p: 3, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider' }}>
                     <Typography variant="h5" fontWeight="bold" gutterBottom>Prescription Details</Typography>
                     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                         <StatusBadge label={prescription.status} color={prescription.status === 'active' ? 'success' : 'default'} />
@@ -50,7 +50,7 @@ export const PrescriptionDetailsModal = ({ open, onClose, prescription, patient 
                         </InfoItem>
 
                         {prescription.medications.map((med, idx) => (
-                            <InfoItem fullWidth key={med.id || idx} sx={{ mb: 2, p: 2, bgcolor: '#fafafa', borderRadius: 2 }}>
+                            <InfoItem fullWidth key={med.id || idx} sx={{ mb: 2, p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} sm={6}>
                                         <Typography variant="subtitle1" fontWeight="bold" color="primary">{med.medicationName}</Typography>
@@ -60,7 +60,7 @@ export const PrescriptionDetailsModal = ({ open, onClose, prescription, patient 
                                         <Typography variant="body2"><strong>Qty:</strong> {med.quantity} • <strong>Refills:</strong> {med.refills}</Typography>
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#555' }}>Sig: {med.instructions}</Typography>
+                                        <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>Sig: {med.instructions}</Typography>
                                     </Grid>
                                 </Grid>
                             </InfoItem>

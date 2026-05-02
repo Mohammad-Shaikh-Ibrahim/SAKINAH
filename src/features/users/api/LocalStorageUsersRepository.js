@@ -71,7 +71,7 @@ class LocalStorageUsersRepository {
     // SELF-REGISTRATION (Public sign-up path)
     // =====================
 
-    async selfRegister({ fullName, email, password }) {
+    async selfRegister({ fullName, email, password, role = 'pending' }) {
         await delay();
         const users = this._getUsers();
 
@@ -79,14 +79,15 @@ class LocalStorageUsersRepository {
             throw new Error('Email already registered');
         }
 
+        const allowedRoles = ['doctor', 'nurse', 'receptionist'];
+        const assignedRole = allowedRoles.includes(role) ? role : 'pending';
+
         const newUser = {
             id: `user-${uuidv4().slice(0, 8)}`,
             email: email.toLowerCase(),
-            password, // TODO: Replace with hashed password (bcrypt) when backend is available
+            password,
             fullName,
-            // SECURITY: Self-registered accounts are pending review — admin must activate
-            // and assign the correct role before the user can log in.
-            role: 'pending',
+            role: assignedRole,
             isActive: false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -99,7 +100,6 @@ class LocalStorageUsersRepository {
         users.push(newUser);
         this._saveUsers(users);
 
-        // Do NOT auto-authenticate — account requires admin approval first.
         return this._sanitizeUser(newUser);
     }
 

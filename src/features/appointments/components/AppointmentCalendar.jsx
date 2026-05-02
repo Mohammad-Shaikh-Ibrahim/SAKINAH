@@ -20,21 +20,55 @@ const localizer = dateFnsLocalizer({
 
 const StyledCalendarWrapper = styled(Box)`
   height: 700px;
-  background-color: white;
+  background-color: ${props => props.theme.palette.background.paper};
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 
   .rbc-calendar {
     font-family: inherit;
+    color: ${props => props.theme.palette.text.primary};
   }
 
   .rbc-header {
     padding: 12px 0;
     font-weight: 700;
-    color: #666;
-    background-color: #f8fbfb;
-    border-bottom: 2px solid #e0e0e0;
+    color: ${props => props.theme.palette.text.secondary};
+    background-color: ${props => props.theme.palette.action.hover};
+    border-bottom: 2px solid ${props => props.theme.palette.divider};
+  }
+
+  .rbc-month-view,
+  .rbc-time-view,
+  .rbc-agenda-view {
+    border-color: ${props => props.theme.palette.divider};
+    background-color: ${props => props.theme.palette.background.paper};
+  }
+
+  .rbc-day-bg,
+  .rbc-month-row,
+  .rbc-time-slot,
+  .rbc-timeslot-group,
+  .rbc-agenda-view table {
+    background-color: ${props => props.theme.palette.background.paper};
+    border-color: ${props => props.theme.palette.divider};
+  }
+
+  .rbc-off-range-bg {
+    background-color: ${props => props.theme.palette.action.disabledBackground};
+  }
+
+  .rbc-date-cell {
+    color: ${props => props.theme.palette.text.primary};
+  }
+
+  .rbc-date-cell.rbc-off-range {
+    color: ${props => props.theme.palette.text.disabled};
+  }
+
+  .rbc-show-more {
+    color: ${props => props.theme.palette.primary.main};
+    background-color: transparent;
   }
 
   .rbc-event {
@@ -50,7 +84,24 @@ const StyledCalendarWrapper = styled(Box)`
   }
 
   .rbc-today {
-    background-color: rgba(45, 149, 150, 0.05);
+    background-color: ${props => props.theme.palette.mode === 'dark'
+      ? 'rgba(78, 205, 196, 0.08)'
+      : 'rgba(45, 149, 150, 0.05)'};
+  }
+
+  .rbc-agenda-date-cell,
+  .rbc-agenda-time-cell,
+  .rbc-agenda-event-cell {
+    color: ${props => props.theme.palette.text.primary};
+    border-color: ${props => props.theme.palette.divider};
+  }
+
+  .rbc-time-content {
+    border-color: ${props => props.theme.palette.divider};
+  }
+
+  .rbc-current-time-indicator {
+    background-color: ${props => props.theme.palette.primary.main};
   }
 
   .rbc-selected {

@@ -11,10 +11,8 @@ class LocalStorageAuthRepository {
         return await usersRepository.authenticate(email, password, remember);
     }
 
-    async register({ fullName, email, password }) {
-        // Delegate user creation to usersRepository.
-        // selfRegister now returns a sanitized user (no session) — account is pending approval.
-        const user = await usersRepository.selfRegister({ fullName, email, password });
+    async register({ fullName, email, password, role }) {
+        const user = await usersRepository.selfRegister({ fullName, email, password, role });
         return { user, pending: true };
     }
 
