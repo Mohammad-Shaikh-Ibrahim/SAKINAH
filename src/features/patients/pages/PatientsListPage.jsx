@@ -18,6 +18,7 @@ import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../auth/store/authSlice';
 import PermissionGuard from '../../users/components/PermissionGuard';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 export const PatientsListPage = () => {
     const user = useSelector(selectCurrentUser);
@@ -25,13 +26,13 @@ export const PatientsListPage = () => {
     const [page, setPage] = useState(1);
     const limit = 10;
 
-    // Debounce search could be added here
+    const debouncedSearch = useDebounce(search, 350);
 
     const { data, isLoading, isError, error } = usePatients({
-        search,
+        search: debouncedSearch,
         page,
         limit,
-        sort: 'desc', // default sort
+        sort: 'desc',
     });
 
     const handleSearchChange = (e) => {

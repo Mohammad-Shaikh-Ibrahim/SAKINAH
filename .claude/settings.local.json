@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npm run build:*)",
       "Bash(npm run dev:*)",
-      "Bash(npm run deploy:*)"
+      "Bash(npm run deploy:*)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\AlShaikh\\\\SAKINAH\" -Force | Select-Object Name, @{Name=\"Type\";Expression={if \\($_.PSIsContainer\\) { \"DIR\" } else { \"FILE\" }}} | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\AlShaikh\\\\SAKINAH\\\\src\" -Recurse -File | Select-Object @{Name=\"RelativePath\";Expression={$_.FullName.Replace\\(\"d:\\\\AlShaikh\\\\SAKINAH\\\\src\\\\\", \"\"\\)}} | Sort-Object RelativePath | ForEach-Object { $_.RelativePath })",
+      "PowerShell(@\\(Get-ChildItem -Path \"d:\\\\AlShaikh\\\\SAKINAH\\\\src\\\\features\" -Directory\\) | ForEach-Object { $_.Name })",
+      "PowerShell(@\\(Get-ChildItem -Path \"d:\\\\AlShaikh\\\\SAKINAH\\\\src\\\\shared\" -Directory\\) | ForEach-Object { $_.Name })",
+      "PowerShell(@\\(Get-ChildItem -Path \"d:\\\\AlShaikh\\\\SAKINAH\\\\src\\\\shared\" -Recurse\\) | Where-Object { !$_.PSIsContainer } | ForEach-Object { $_.FullName.Replace\\(\"d:\\\\AlShaikh\\\\SAKINAH\\\\src\\\\shared\\\\\", \"\"\\) } | Sort-Object)"
     ]
   }
 }

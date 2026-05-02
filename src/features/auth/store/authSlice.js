@@ -23,6 +23,16 @@ export const registerUser = createAsyncThunk(
     }
 );
 
+// Side effect (localStorage clear) lives here, not inside the reducer
+export const logout = createAsyncThunk('auth/logout', async () => {
+    authRepository.logout();
+});
+
+// Side effect (localStorage read) lives here, not inside the reducer
+export const initializeAuth = createAsyncThunk('auth/initialize', async () => {
+    return authRepository.restoreSession();
+});
+
 const initialState = {
     user: null,
     token: null,
@@ -37,22 +47,6 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        logout: (state) => {
-            authRepository.logout();
-            state.user = null;
-            state.token = null;
-            state.isAuthenticated = false;
-            state.error = null;
-        },
-        initializeAuth: (state) => {
-            const session = authRepository.restoreSession();
-            if (session) {
-                state.user = session.user;
-                state.token = session.token;
-                state.isAuthenticated = true;
-            }
-            state.isInitialized = true;
-        },
         clearError: (state) => {
             state.error = null;
         },
@@ -77,7 +71,7 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-            // Register — account is now pending approval; no auto-login
+            // Register
             .addCase(registerUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -85,10 +79,8 @@ const authSlice = createSlice({
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
                 if (action.payload.pending) {
-                    // Account created but not active — redirect to pending page
                     state.pendingRegistration = true;
                 } else {
-                    // Legacy path (admin-created users that are immediately active)
                     state.user = action.payload.user;
                     state.token = action.payload.token;
                     state.isAuthenticated = true;
@@ -97,11 +89,30 @@ const authSlice = createSlice({
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+            // Logout
+            .addCase(logout.fulfilled, (state) => {
+                state.user = null;
+                state.token = null;
+                state.isAuthenticated = false;
+                state.error = null;
+            })
+            // Initialize session from storage
+            .addCase(initializeAuth.fulfilled, (state, action) => {
+                if (action.payload) {
+                    state.user = action.payload.user;
+                    state.token = action.payload.token;
+                    state.isAuthenticated = true;
+                }
+                state.isInitialized = true;
+            })
+            .addCase(initializeAuth.rejected, (state) => {
+                state.isInitialized = true;
             });
     },
 });
 
-export const { logout, initializeAuth, clearError, clearPendingRegistration } = authSlice.actions;
+export const { clearError, clearPendingRegistration } = authSlice.actions;
 
 export const selectAuth = (state) => state.auth;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;

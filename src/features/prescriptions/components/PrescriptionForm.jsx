@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller, useWatch } from 'react-hook-form';
 import {
     Box,
     Paper,
@@ -36,7 +36,7 @@ export const PrescriptionForm = ({
     patientId: initialPatientId,
     onCancel
 }) => {
-    const { control, handleSubmit, watch, setValue, register } = useForm({
+    const { control, handleSubmit, setValue, register } = useForm({
         defaultValues: defaultValues || {
             patientId: initialPatientId || '',
             prescriptionDate: new Date().toISOString().split('T')[0],
@@ -58,7 +58,6 @@ export const PrescriptionForm = ({
         }
     });
 
-    const currentPatientId = watch('patientId');
     const [selectedPatient, setSelectedPatient] = React.useState(null);
 
     const { fields, append, remove } = useFieldArray({
@@ -66,7 +65,10 @@ export const PrescriptionForm = ({
         name: "medications"
     });
 
-    const watchedMedications = watch('medications');
+    // useWatch subscribes only this component to medication changes,
+    // preventing the full form from re-rendering on every keystroke
+    const currentPatientId = useWatch({ control, name: 'patientId' });
+    const watchedMedications = useWatch({ control, name: 'medications' });
 
     const handlePatientSelect = (patient) => {
         setSelectedPatient(patient);
@@ -174,7 +176,7 @@ export const PrescriptionForm = ({
                 </Box>
 
                 {fields.map((field, index) => {
-                    const frequency = watch(`medications.${index}.frequency`);
+                    const frequency = watchedMedications?.[index]?.frequency;
 
                     return (
                         <Card key={field.id} elevation={3} sx={{ mb: 3, overflow: 'visible', borderRadius: 2 }}>
