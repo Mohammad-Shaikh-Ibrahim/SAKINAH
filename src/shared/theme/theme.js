@@ -1,26 +1,25 @@
 import { createTheme } from '@mui/material/styles';
 
-// Define the brand colors based on the "AMAL/hope" theme (Teal/Blue/Green)
 export const tokens = {
   primary: {
-    main: '#009688', // Teal
-    light: '#33ab9f',
-    dark: '#00695f',
+    main: '#2D9596',    // brand teal — used consistently across all components
+    light: '#4DB6AC',
+    dark: '#0d4a4b',    // deep teal for gradients and hover states
     contrastText: '#ffffff',
   },
   secondary: {
-    main: '#4caf50', // Green
+    main: '#4caf50',
     light: '#6fbf73',
     dark: '#357a38',
     contrastText: '#ffffff',
   },
   background: {
-    default: '#f4f6f8', // Soft gray/blueish background
+    default: '#f4f6f8',
     paper: '#ffffff',
   },
   text: {
-    primary: '#172b4d',
-    secondary: '#6b778c',
+    primary: '#172B4D',   // dark navy — heading text, labels
+    secondary: '#6B778C', // slate — captions, meta text
   },
   status: {
     success: '#36B37E',
@@ -30,7 +29,6 @@ export const tokens = {
   },
 };
 
-// Create MUI theme
 export const theme = createTheme({
   palette: {
     primary: tokens.primary,
@@ -54,13 +52,13 @@ export const theme = createTheme({
     body2: { fontSize: '0.875rem', lineHeight: 1.43 },
   },
   shape: {
-    borderRadius: 8, // Soft rounded corners
+    borderRadius: 8,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none', // Remove uppercase transform
+          textTransform: 'none',
           fontWeight: 600,
           borderRadius: '8px',
         },
@@ -69,7 +67,7 @@ export const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)', // Gentle shadow
+          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
         },
       },
     },

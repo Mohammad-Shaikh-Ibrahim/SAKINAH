@@ -34,8 +34,6 @@ import {
     Error as ErrorIcon,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
 import styled from 'styled-components';
 import { useAuditLogs, useExportAuditLogs } from '../hooks/useAuditLogs';
@@ -143,8 +141,7 @@ const AuditLogsPage = () => {
     const total = logsData?.total || 0;
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Container maxWidth="xl">
+        <Container maxWidth="xl">
                 <PageHeader>
                     <Box>
                         <Typography variant="h4" gutterBottom>
@@ -439,7 +436,6 @@ const AuditLogsPage = () => {
                     log={selectedLog}
                 />
             </Container>
-        </LocalizationProvider>
     );
 };
 

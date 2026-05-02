@@ -30,7 +30,8 @@ export const AdminDashboard = ({ user }) => {
 
     const { data: generalStats, isLoading: statsLoading } = useGeneralStats(user?.id);
     const { data: demographics, isLoading: demoLoading }  = usePatientDemographics(user?.id);
-    const { data: usersData }                              = useUsers({ isActive: true, limit: 1000 });
+    // limit:1 fetches only one row but the repository always returns the correct `total`
+    const { data: usersData }                              = useUsers({ isActive: true, limit: 1 });
     const { data: auditData, isLoading: auditLoading }     = useAuditLogs({ limit: 10 });
 
     const activeStaff = usersData?.total ?? '—';

@@ -30,7 +30,7 @@ const COLUMNS = [
     { id: 'actions', label: 'Actions', align: 'right' },
 ];
 
-export const PatientsTable = memo(({ patients, loading, total, page, limit, onPageChange }) => {
+export const PatientsTable = memo(({ patients, loading, total, page, limit, onPageChange, onDelete }) => {
     if (loading) {
         return (
             <Box>
@@ -110,6 +110,7 @@ export const PatientsTable = memo(({ patients, loading, total, page, limit, onPa
                                                 color="primary"
                                                 component={RouterLink}
                                                 to={`/dashboard/patients/${patient.id}`}
+                                                aria-label={`View ${patient.firstName} ${patient.lastName}`}
                                                 sx={{ bgcolor: 'primary.lighter' }}
                                             >
                                                 <VisibilityIcon fontSize="small" />
@@ -121,15 +122,25 @@ export const PatientsTable = memo(({ patients, loading, total, page, limit, onPa
                                                 color="info"
                                                 component={RouterLink}
                                                 to={`/dashboard/patients/${patient.id}/edit`}
+                                                aria-label={`Edit ${patient.firstName} ${patient.lastName}`}
                                                 sx={{ bgcolor: 'info.lighter' }}
                                             >
                                                 <EditIcon fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
-                                        {/* Delete would typically open a confirmation dialog */}
-                                        {/* <IconButton size="small" color="error">
-                      <DeleteIcon fontSize="small" />
-                    </IconButton> */}
+                                        {onDelete && (
+                                            <Tooltip title="Delete Patient">
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    aria-label={`Delete ${patient.firstName} ${patient.lastName}`}
+                                                    onClick={() => onDelete(patient)}
+                                                    sx={{ bgcolor: 'error.lighter' }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
                                     </Box>
                                 </TableCell>
                             </TableRow>
@@ -160,4 +171,5 @@ PatientsTable.propTypes = {
     page: PropTypes.number,
     limit: PropTypes.number,
     onPageChange: PropTypes.func,
+    onDelete: PropTypes.func,
 };
