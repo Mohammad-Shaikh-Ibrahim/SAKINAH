@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     Menu,
     MenuItem,
@@ -9,14 +10,16 @@ import {
     Typography,
     Chip,
     Divider,
+    Switch,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import PeopleIcon from '@mui/icons-material/People';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import SettingsIcon from '@mui/icons-material/Settings';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { setThemeMode, selectThemeMode } from '../../shared/ui/uiSlice';
 
 export const DashboardUserMenu = ({
     anchorEl,
@@ -32,7 +35,12 @@ export const DashboardUserMenu = ({
     isUsersActive,
     isAuditActive,
     isHelpActive,
-}) => (
+}) => {
+    const dispatch = useDispatch();
+    const themeMode = useSelector(selectThemeMode);
+    const isDark = themeMode === 'dark';
+
+    return (
     <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -68,12 +76,12 @@ export const DashboardUserMenu = ({
             My Profile
         </MenuItem>
 
-        <MenuItem disabled>
-            <SettingsIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
-                Settings
-                <Chip label="Soon" size="small" sx={{ height: 18, fontSize: '0.6rem', bgcolor: 'action.hover', ml: 1 }} />
+        <MenuItem onClick={() => dispatch(setThemeMode(isDark ? 'light' : 'dark'))} sx={{ justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <DarkModeIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                Dark Mode
             </Box>
+            <Switch size="small" checked={isDark} onChange={() => dispatch(setThemeMode(isDark ? 'light' : 'dark'))} onClick={(e) => e.stopPropagation()} />
         </MenuItem>
 
         {isAdmin && <Divider />}
@@ -123,7 +131,8 @@ export const DashboardUserMenu = ({
             Logout
         </MenuItem>
     </Menu>
-);
+    );
+};
 
 DashboardUserMenu.propTypes = {
     anchorEl: PropTypes.any,

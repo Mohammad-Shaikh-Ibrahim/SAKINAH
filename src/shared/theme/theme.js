@@ -2,9 +2,9 @@ import { createTheme } from '@mui/material/styles';
 
 export const tokens = {
   primary: {
-    main: '#2D9596',    // brand teal — used consistently across all components
+    main: '#2D9596',
     light: '#4DB6AC',
-    dark: '#0d4a4b',    // deep teal for gradients and hover states
+    dark: '#0d4a4b',
     contrastText: '#ffffff',
   },
   secondary: {
@@ -18,8 +18,8 @@ export const tokens = {
     paper: '#ffffff',
   },
   text: {
-    primary: '#172B4D',   // dark navy — heading text, labels
-    secondary: '#6B778C', // slate — captions, meta text
+    primary: '#172B4D',
+    secondary: '#6B778C',
   },
   status: {
     success: '#36B37E',
@@ -29,17 +29,7 @@ export const tokens = {
   },
 };
 
-export const theme = createTheme({
-  palette: {
-    primary: tokens.primary,
-    secondary: tokens.secondary,
-    background: tokens.background,
-    text: tokens.text,
-    success: { main: tokens.status.success },
-    warning: { main: tokens.status.warning },
-    error: { main: tokens.status.error },
-    info: { main: tokens.status.info },
-  },
+const sharedOverrides = {
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: { fontSize: '2.5rem', fontWeight: 600 },
@@ -51,25 +41,37 @@ export const theme = createTheme({
     body1: { fontSize: '1rem', lineHeight: 1.5 },
     body2: { fontSize: '0.875rem', lineHeight: 1.43 },
   },
-  shape: {
-    borderRadius: 8,
-  },
+  shape: { borderRadius: 8 },
   components: {
     MuiButton: {
       styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontWeight: 600,
-          borderRadius: '8px',
-        },
+        root: { textTransform: 'none', fontWeight: 600, borderRadius: '8px' },
       },
     },
     MuiPaper: {
       styleOverrides: {
-        root: {
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
-        },
+        root: { boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)' },
       },
     },
   },
-});
+};
+
+export const createAppTheme = (mode = 'light') =>
+  createTheme({
+    ...sharedOverrides,
+    palette: {
+      mode,
+      primary: tokens.primary,
+      secondary: tokens.secondary,
+      ...(mode === 'light' && {
+        background: tokens.background,
+        text: tokens.text,
+      }),
+      success: { main: tokens.status.success },
+      warning: { main: tokens.status.warning },
+      error: { main: tokens.status.error },
+      info: { main: tokens.status.info },
+    },
+  });
+
+export const theme = createAppTheme('light');

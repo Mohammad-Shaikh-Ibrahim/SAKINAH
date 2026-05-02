@@ -538,6 +538,33 @@ class LocalStorageUsersRepository {
         return { success: true };
     }
 
+    async adminResetPassword(targetUserId, newPassword, adminId) {
+        await delay();
+        const users = this._getUsers();
+        const adminUser = users.find(u => u.id === adminId);
+        if (!adminUser || adminUser.role !== 'admin') throw new Error('Unauthorized');
+
+        const idx = users.findIndex(u => u.id === targetUserId);
+        if (idx === -1) throw new Error('User not found');
+
+        users[idx].password = newPassword;
+        users[idx].mustChangePassword = true;
+        users[idx].updatedAt = new Date().toISOString();
+        this._saveUsers(users);
+
+        await this.logAction({
+            userId: adminId,
+            action: 'update',
+            resource: 'users',
+            resourceId: targetUserId,
+            resourceName: users[idx].fullName,
+            details: 'Admin reset password',
+            isSuccess: true,
+        });
+
+        return { success: true };
+    }
+
     // =====================
     // ROLE & PERMISSIONS
     // =====================

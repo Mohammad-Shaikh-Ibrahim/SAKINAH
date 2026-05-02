@@ -83,9 +83,10 @@ class LocalStorageAppointmentsRepository extends BaseRepository {
 
     // --- Availability & Conflicts ---
 
-    async checkTimeSlotAvailability(date, startTime, endTime, userId) {
+    async checkTimeSlotAvailability(date, startTime, endTime, userId, excludeId = null) {
         await this.ensureInitialized();
         const conflicts = Array.from(this._cache.values()).filter(apt =>
+            apt.id !== excludeId &&
             apt.doctorId === userId &&
             apt.appointmentDate === date &&
             apt.status !== 'cancelled' &&

@@ -134,6 +134,16 @@ export function useActivateUser() {
     });
 }
 
+// Admin-issued password reset
+export function useAdminResetPassword() {
+    const currentUser = useSelector(selectCurrentUser);
+
+    return useMutation({
+        mutationFn: ({ userId, newPassword }) =>
+            usersRepository.adminResetPassword(userId, newPassword, currentUser?.id),
+    });
+}
+
 // Change password mutation
 export function useChangePassword() {
     const currentUser = useSelector(selectCurrentUser);

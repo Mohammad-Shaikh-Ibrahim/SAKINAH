@@ -34,6 +34,7 @@ export const PrescriptionForm = ({
     onSubmit,
     isSubmitting,
     patientId: initialPatientId,
+    initialPatient,
     onCancel
 }) => {
     const { control, handleSubmit, setValue, register } = useForm({
@@ -58,7 +59,7 @@ export const PrescriptionForm = ({
         }
     });
 
-    const [selectedPatient, setSelectedPatient] = React.useState(null);
+    const [selectedPatient, setSelectedPatient] = React.useState(initialPatient || null);
 
     const { fields, append, remove } = useFieldArray({
         control,

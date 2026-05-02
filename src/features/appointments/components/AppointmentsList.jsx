@@ -16,14 +16,29 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { useUpdateAppointment } from '../hooks/useAppointments';
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../../shared/ui/uiSlice';
 
 export const AppointmentsList = ({ appointments, onViewDetails }) => {
+    const dispatch = useDispatch();
+    const updateMutation = useUpdateAppointment();
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'completed': return 'success';
             case 'cancelled': return 'error';
             case 'no-show': return 'warning';
             default: return 'primary';
+        }
+    };
+
+    const handleQuickStatus = async (apt, status) => {
+        try {
+            await updateMutation.mutateAsync({ id: apt.id, data: { status } });
+            dispatch(showToast({ message: `Appointment marked as ${status}`, severity: 'success' }));
+        } catch {
+            dispatch(showToast({ message: 'Failed to update status', severity: 'error' }));
         }
     };
 
@@ -82,11 +97,39 @@ export const AppointmentsList = ({ appointments, onViewDetails }) => {
                                 </Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Tooltip title="View Details">
-                                    <IconButton size="small" color="primary" onClick={() => onViewDetails(apt)}>
-                                        <VisibilityIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
+                                <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
+                                    {apt.status === 'scheduled' && (
+                                        <>
+                                            <Tooltip title="Mark Complete">
+                                                <IconButton
+                                                    size="small"
+                                                    color="success"
+                                                    aria-label="mark complete"
+                                                    disabled={updateMutation.isPending}
+                                                    onClick={() => handleQuickStatus(apt, 'completed')}
+                                                >
+                                                    <CheckCircleIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Cancel Appointment">
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    aria-label="cancel appointment"
+                                                    disabled={updateMutation.isPending}
+                                                    onClick={() => handleQuickStatus(apt, 'cancelled')}
+                                                >
+                                                    <CancelIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </>
+                                    )}
+                                    <Tooltip title="View Details">
+                                        <IconButton size="small" color="primary" aria-label="view details" onClick={() => onViewDetails(apt)}>
+                                            <VisibilityIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
                             </TableCell>
                         </TableRow>
                     ))}

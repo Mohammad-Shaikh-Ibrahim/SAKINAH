@@ -83,6 +83,23 @@ export function useDeleteAppointment() {
     });
 }
 
+export function useCheckAppointmentConflict({ date, startTime, endTime, excludeId } = {}) {
+    const user = useSelector(selectCurrentUser);
+    const userId = user?.id;
+
+    return useQuery({
+        queryKey: ['appointment-conflict', userId, date, startTime, endTime, excludeId],
+        queryFn: async () => {
+            const available = await appointmentsRepository.checkTimeSlotAvailability(
+                date, startTime, endTime, userId, excludeId
+            );
+            return { hasConflict: !available };
+        },
+        enabled: !!userId && !!date && !!startTime && !!endTime,
+        staleTime: 5000,
+    });
+}
+
 export function useDoctorAvailability() {
     const user = useSelector(selectCurrentUser);
     const userId = user?.id;

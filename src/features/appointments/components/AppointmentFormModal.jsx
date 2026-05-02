@@ -1,24 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import {
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
     Button,
-    Grid,
     MenuItem,
     Alert,
     Box,
     Autocomplete,
     TextField,
 } from '@mui/material';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { LoadingButton } from '@mui/lab';
 import { ControlledTextField } from '../../../shared/ui/ControlledTextField';
 import { FormGrid, FormFieldWrapper, ModalContentWrapper } from '../../../shared/ui/FormLayouts';
 import { usePatients } from '../../patients/api/usePatients';
-import { useCreateAppointment, useUpdateAppointment } from '../hooks/useAppointments';
-import { format, addMinutes, parseISO } from 'date-fns';
+import { useCreateAppointment, useUpdateAppointment, useCheckAppointmentConflict } from '../hooks/useAppointments';
+import { format, addMinutes } from 'date-fns';
 
 export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, initialTime }) => {
     const isEditMode = !!appointment;
@@ -26,7 +26,7 @@ export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, 
     const createMutation = useCreateAppointment();
     const updateMutation = useUpdateAppointment();
 
-    const { control, handleSubmit, reset, watch, setValue } = useForm({
+    const { control, handleSubmit, reset, setValue } = useForm({
         defaultValues: {
             patientId: '',
             patientName: '',
@@ -39,8 +39,26 @@ export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, 
         }
     });
 
-    const watchDuration = watch('duration');
-    const watchStartTime = watch('startTime');
+    const watchDuration = useWatch({ control, name: 'duration' });
+    const watchStartTime = useWatch({ control, name: 'startTime' });
+    const watchDate = useWatch({ control, name: 'appointmentDate' });
+    const watchPatientId = useWatch({ control, name: 'patientId' });
+
+    // Compute endTime for conflict check
+    const conflictEndTime = (() => {
+        if (!watchStartTime || !watchDuration) return null;
+        const [h, m] = watchStartTime.split(':').map(Number);
+        const start = new Date();
+        start.setHours(h, m, 0, 0);
+        return format(addMinutes(start, Number(watchDuration)), 'HH:mm');
+    })();
+
+    const { data: conflictData } = useCheckAppointmentConflict({
+        date: watchDate,
+        startTime: watchStartTime,
+        endTime: conflictEndTime,
+        excludeId: appointment?.id || null,
+    });
 
     useEffect(() => {
         if (open) {
@@ -97,7 +115,7 @@ export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, 
                             <Autocomplete
                                 options={patientOptions}
                                 getOptionLabel={(option) => `${option.firstName} ${option.lastName} (${option.phone})`}
-                                value={patientOptions.find(p => p.id === watch('patientId')) || null}
+                                value={patientOptions.find(p => p.id === watchPatientId) || null}
                                 onChange={(event, newValue) => {
                                     setValue('patientId', newValue?.id || '');
                                     setValue('patientName', newValue ? `${newValue.firstName} ${newValue.lastName}` : '');
@@ -107,7 +125,6 @@ export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, 
                                         {...params}
                                         label="Select Patient"
                                         required
-                                        error={!watch('patientId') && !!watch('reason')} // Simple heuristic for touched
                                     />
                                 )}
                             />
@@ -197,6 +214,15 @@ export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, 
                     </FormGrid>
                 </ModalContentWrapper>
             </DialogContent>
+
+            {conflictData?.hasConflict && (
+                <Box sx={{ px: 3, pt: 1 }}>
+                    <Alert severity="warning" icon={<WarningAmberIcon fontSize="inherit" />}>
+                        This time slot conflicts with an existing appointment. You can still book, but please verify.
+                    </Alert>
+                </Box>
+            )}
+
             <DialogActions sx={{ px: 3, py: 2 }}>
                 <Button onClick={onClose} color="inherit">Cancel</Button>
                 <LoadingButton

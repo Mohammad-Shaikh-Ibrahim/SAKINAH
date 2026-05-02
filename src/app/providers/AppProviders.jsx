@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Provider as ReduxProvider, useDispatch } from 'react-redux';
+import { Provider as ReduxProvider, useDispatch, useSelector } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
@@ -11,19 +11,33 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import { store } from '../store';
 import { queryClient } from '../../shared/lib/queryClient';
-import { theme } from '../../shared/theme/theme';
+import { createAppTheme } from '../../shared/theme/theme';
 import { GlobalStyles } from '../../shared/theme/GlobalStyles';
 import { initializeAuth } from '../../features/auth';
 import { GlobalSnackbar } from '../../shared/ui/GlobalSnackbar';
+import { selectThemeMode } from '../../shared/ui/uiSlice';
 
 const AuthInitializer = ({ children }) => {
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(initializeAuth());
-    }, [dispatch]);
-
+    useEffect(() => { dispatch(initializeAuth()); }, [dispatch]);
     return children;
+};
+
+const ThemedApp = ({ children }) => {
+    const themeMode = useSelector(selectThemeMode);
+    const dynamicTheme = useMemo(() => createAppTheme(themeMode), [themeMode]);
+    return (
+        <ThemeProvider theme={dynamicTheme}>
+            <StyledThemeProvider theme={dynamicTheme}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <CssBaseline />
+                    <GlobalStyles />
+                    {children}
+                    <GlobalSnackbar />
+                </LocalizationProvider>
+            </StyledThemeProvider>
+        </ThemeProvider>
+    );
 };
 
 export const AppProviders = ({ children }) => {
@@ -32,16 +46,9 @@ export const AppProviders = ({ children }) => {
             <ReduxProvider store={store}>
                 <AuthInitializer>
                     <QueryClientProvider client={queryClient}>
-                        <ThemeProvider theme={theme}>
-                            <StyledThemeProvider theme={theme}>
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                    <CssBaseline />
-                                    <GlobalStyles />
-                                    {children}
-                                    <GlobalSnackbar />
-                                </LocalizationProvider>
-                            </StyledThemeProvider>
-                        </ThemeProvider>
+                        <ThemedApp>
+                            {children}
+                        </ThemedApp>
                     </QueryClientProvider>
                 </AuthInitializer>
             </ReduxProvider>

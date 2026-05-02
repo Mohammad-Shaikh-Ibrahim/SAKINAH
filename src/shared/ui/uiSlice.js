@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     isSidebarOpen: true,
-    themeMode: 'light',
+    themeMode: localStorage.getItem('sakinah_theme') || 'light',
     toast: {
         open: false,
         message: '',

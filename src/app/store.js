@@ -9,3 +9,7 @@ export const store = configureStore({
     },
     devTools: !import.meta.env.PROD,
 });
+
+store.subscribe(() => {
+    localStorage.setItem('sakinah_theme', store.getState().ui.themeMode);
+});

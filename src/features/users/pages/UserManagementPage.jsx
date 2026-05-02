@@ -33,6 +33,7 @@ import {
     CheckCircle as CheckCircleIcon,
     Search as SearchIcon,
     Refresh as RefreshIcon,
+    LockReset as LockResetIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import styled from 'styled-components';
@@ -41,11 +42,22 @@ import {
     useDeleteUser,
     useDeactivateUser,
     useActivateUser,
+    useAdminResetPassword,
 } from '../hooks/useUsers';
 import RoleBadge, { StatusBadge } from '../components/RoleBadge';
 import UserFormModal from '../components/UserFormModal';
 import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
 import { ROLE_OPTIONS } from '../model/roles';
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../../shared/ui/uiSlice';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    InputAdornment,
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const PageHeader = styled(Box)`
     display: flex;
@@ -65,6 +77,7 @@ const FiltersBox = styled(Box)`
 `;
 
 const UserManagementPage = () => {
+    const dispatch = useDispatch();
     // State
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -74,6 +87,9 @@ const UserManagementPage = () => {
     const [formOpen, setFormOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [confirmAction, setConfirmAction] = useState(null);
+    const [resetTarget, setResetTarget] = useState(null);
+    const [newPassword, setNewPassword] = useState('');
+    const [showPwd, setShowPwd] = useState(false);
 
     // Queries and mutations
     const {
@@ -93,6 +109,7 @@ const UserManagementPage = () => {
     const deleteUser = useDeleteUser();
     const deactivateUser = useDeactivateUser();
     const activateUser = useActivateUser();
+    const resetPassword = useAdminResetPassword();
 
     // Handlers
     const handlePageChange = (event, newPage) => {
@@ -143,6 +160,21 @@ const UserManagementPage = () => {
             console.error('Action error:', error);
         }
         setConfirmAction(null);
+    };
+
+    const handleResetPassword = async () => {
+        if (!newPassword || newPassword.length < 6) {
+            dispatch(showToast({ message: 'Password must be at least 6 characters', severity: 'warning' }));
+            return;
+        }
+        try {
+            await resetPassword.mutateAsync({ userId: resetTarget.id, newPassword });
+            dispatch(showToast({ message: `Password reset for ${resetTarget.fullName}. They must change it on next login.`, severity: 'success' }));
+            setResetTarget(null);
+            setNewPassword('');
+        } catch (e) {
+            dispatch(showToast({ message: e.message || 'Reset failed', severity: 'error' }));
+        }
     };
 
     const users = usersData?.data || [];
@@ -329,11 +361,20 @@ const UserManagementPage = () => {
                                             <Tooltip title="Edit">
                                                 <IconButton
                                                     size="small"
-                                                    onClick={() =>
-                                                        handleOpenForm(user)
-                                                    }
+                                                    onClick={() => handleOpenForm(user)}
                                                 >
                                                     <EditIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+
+                                            <Tooltip title="Reset Password">
+                                                <IconButton
+                                                    size="small"
+                                                    color="info"
+                                                    aria-label="reset password"
+                                                    onClick={() => { setResetTarget(user); setNewPassword(''); }}
+                                                >
+                                                    <LockResetIcon fontSize="small" />
                                                 </IconButton>
                                             </Tooltip>
 
@@ -415,6 +456,45 @@ const UserManagementPage = () => {
                 user={selectedUser}
                 onSuccess={handleFormSuccess}
             />
+
+            {/* Reset Password Dialog */}
+            <Dialog open={!!resetTarget} onClose={() => setResetTarget(null)} maxWidth="xs" fullWidth>
+                <DialogTitle fontWeight="bold">Reset Password</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        Set a new temporary password for <strong>{resetTarget?.fullName}</strong>.
+                        They will be required to change it on next login.
+                    </Typography>
+                    <TextField
+                        autoFocus
+                        fullWidth
+                        label="New Password"
+                        type={showPwd ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton size="small" onClick={() => setShowPwd(p => !p)}>
+                                        {showPwd ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
+                        helperText="Minimum 6 characters"
+                    />
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button onClick={() => setResetTarget(null)} color="inherit">Cancel</Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleResetPassword}
+                        disabled={resetPassword.isPending || newPassword.length < 6}
+                    >
+                        Reset Password
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Confirm Action Modal */}
             <ConfirmModal

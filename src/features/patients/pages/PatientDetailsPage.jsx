@@ -25,6 +25,7 @@ import { formatDate } from '../../../shared/utils/dateUtils';
 import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
 import { PrescriptionsListPage } from '../../prescriptions';
 import { PatientDocumentsTab } from '../components/PatientDocumentsTab';
+import { PatientVitalsTab } from '../components/PatientVitalsTab';
 import { PatientAccessManagement, PermissionGuard, usePermissions } from '../../users';
 
 function TabPanel(props) {
@@ -129,6 +130,7 @@ export const PatientDetailsPage = () => {
                         <Tab label="Overview" />
                         {hasPermission('patients.read') && <Tab label="Medical History" />}
                         {hasPermission('prescriptions.read') && <Tab label="Prescriptions" />}
+                        {hasPermission('patients.update.vitals') && <Tab label="Vitals" />}
                         {(hasPermission('documents.read') || hasPermission('documents.read.insurance')) && <Tab label="Documents" />}
                         {(isAdmin || isDoctor) && <Tab label="Access" />}
                     </Tabs>
@@ -236,16 +238,23 @@ export const PatientDetailsPage = () => {
                     </TabPanel>
                 )}
 
+                {/* Vitals Tab */}
+                {hasPermission('patients.update.vitals') && (
+                    <TabPanel value={tabValue} index={3}>
+                        <PatientVitalsTab patientId={id} patient={patient} />
+                    </TabPanel>
+                )}
+
                 {/* Documents Tab */}
                 {(hasPermission('documents.read') || hasPermission('documents.read.insurance')) && (
-                    <TabPanel value={tabValue} index={3}>
+                    <TabPanel value={tabValue} index={4}>
                         <PatientDocumentsTab patientId={id} />
                     </TabPanel>
                 )}
 
                 {/* Access Tab (Admin/Doctor Only) */}
                 {(isAdmin || isDoctor) && (
-                    <TabPanel value={tabValue} index={4}>
+                    <TabPanel value={tabValue} index={5}>
                         <PatientAccessManagement
                             patientId={id}
                             patientName={`${patient.firstName} ${patient.lastName}`}
