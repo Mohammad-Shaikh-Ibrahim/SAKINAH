@@ -19,6 +19,7 @@ import { useGeneralStats, usePatientDemographics } from '../hooks/useAnalytics';
 import { useAuditLogs } from '../../users/hooks/useAuditLogs';
 import { useUsers } from '../../users/hooks/useUsers';
 import { DemographicsCharts } from '../components/DemographicsCharts';
+import { PatientRiskPanel } from '../components/PatientRiskPanel';
 
 const ACTION_COLORS = {
     create: 'success',
@@ -198,6 +199,11 @@ export const AdminDashboard = ({ user }) => {
                             <DemographicsCharts data={demographics} />
                         )}
                     </Paper>
+                </Grid>
+
+                {/* Patient Risk Watch */}
+                <Grid item xs={12}>
+                    <PatientRiskPanel />
                 </Grid>
             </Grid>
         </>
