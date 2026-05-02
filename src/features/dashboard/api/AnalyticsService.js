@@ -7,28 +7,33 @@ const ANALYTICS_FETCH_LIMIT = 1000;
 
 class AnalyticsService {
     /**
-     * Get general statistics for the dashboard
+     * Get general statistics for the dashboard.
+     * @param {string} userId
+     * @param {{ startDate?: string, endDate?: string }} options - ISO date strings (yyyy-MM-dd).
+     *   When omitted, defaults to last 30 days for appointments and last 7 days for new patients.
      */
-    async getGeneralStats(userId) {
+    async getGeneralStats(userId, { startDate, endDate } = {}) {
         const { data: patients } = await patientsRepository.getAll({ userId, limit: ANALYTICS_FETCH_LIMIT });
 
-        const thirtyDaysAgo = subDays(new Date(), 30).toISOString();
-        const tomorrow = subDays(new Date(), -1).toISOString();
+        const rangeStart = startDate ?? format(subDays(new Date(), 30), 'yyyy-MM-dd');
+        const rangeEnd   = endDate   ?? format(new Date(), 'yyyy-MM-dd');
 
         const appointments = await appointmentsRepository.getAppointmentsByDateRange(
-            thirtyDaysAgo,
-            tomorrow,
+            rangeStart,
+            rangeEnd,
             userId
         );
 
         const totalPatients = patients.length;
-        const sevenDaysAgo = subDays(new Date(), 7);
-        const newPatientsThisWeek = patients.filter(p => isAfter(new Date(p.createdAt), sevenDaysAgo)).length;
+
+        const newPatientsInRange = patients.filter(p => {
+            const created = format(new Date(p.createdAt), 'yyyy-MM-dd');
+            return created >= rangeStart && created <= rangeEnd;
+        }).length;
 
         const today = format(new Date(), 'yyyy-MM-dd');
         const todaysAppointments = appointments.filter(a => a.appointmentDate === today).length;
 
-        // Derive completion rate from real data
         const completedAppointments = appointments.filter(a => a.status === 'completed').length;
         const completionRate = appointments.length > 0
             ? Math.round((completedAppointments / appointments.length) * 100)
@@ -36,9 +41,12 @@ class AnalyticsService {
 
         return {
             totalPatients,
-            newPatientsThisWeek,
+            newPatientsInRange,
+            appointmentsInRange: appointments.length,
             todaysAppointments,
             completionRate,
+            rangeStart,
+            rangeEnd,
         };
     }
 

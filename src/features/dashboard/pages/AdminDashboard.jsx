@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Grid, Typography, Box, Paper, Button, Stack, Divider,
     List, ListItem, ListItemText, ListItemIcon, Chip, Skeleton,
+    ToggleButtonGroup, ToggleButton,
 } from '@mui/material';
 import { Helmet } from 'react-helmet-async';
 import { Link as RouterLink } from 'react-router-dom';
@@ -11,11 +12,12 @@ import PeopleIcon from '@mui/icons-material/People';
 import GroupIcon from '@mui/icons-material/Group';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { format } from 'date-fns';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { format, subDays } from 'date-fns';
 import { useGeneralStats, usePatientDemographics } from '../hooks/useAnalytics';
 import { useAuditLogs } from '../../users/hooks/useAuditLogs';
 import { useUsers } from '../../users/hooks/useUsers';
-import { StatsOverview } from '../components/StatsOverview';
 import { DemographicsCharts } from '../components/DemographicsCharts';
 
 const ACTION_COLORS = {
@@ -25,10 +27,35 @@ const ACTION_COLORS = {
     login: 'default',
 };
 
-export const AdminDashboard = ({ user }) => {
-    const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+const DATE_PRESETS = [
+    { label: 'Today',   days: 0 },
+    { label: '7 days',  days: 7 },
+    { label: '30 days', days: 30 },
+    { label: '90 days', days: 90 },
+];
 
-    const { data: generalStats, isLoading: statsLoading } = useGeneralStats(user?.id);
+export const AdminDashboard = ({ user }) => {
+    const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+    const [preset, setPreset] = useState('30 days');
+    const [customStart, setCustomStart] = useState(null);
+    const [customEnd, setCustomEnd] = useState(null);
+
+    const { startDate, endDate } = useMemo(() => {
+        if (preset === 'custom' && customStart && customEnd) {
+            return {
+                startDate: format(customStart, 'yyyy-MM-dd'),
+                endDate: format(customEnd, 'yyyy-MM-dd'),
+            };
+        }
+        const selectedPreset = DATE_PRESETS.find(p => p.label === preset);
+        const days = selectedPreset?.days ?? 30;
+        return {
+            startDate: format(subDays(new Date(), days), 'yyyy-MM-dd'),
+            endDate: todayStr,
+        };
+    }, [preset, customStart, customEnd, todayStr]);
+
+    const { data: generalStats, isLoading: statsLoading } = useGeneralStats(user?.id, { startDate, endDate });
     const { data: demographics, isLoading: demoLoading }  = usePatientDemographics(user?.id);
     // limit:1 fetches only one row but the repository always returns the correct `total`
     const { data: usersData }                              = useUsers({ isActive: true, limit: 1 });
@@ -59,15 +86,61 @@ export const AdminDashboard = ({ user }) => {
                 </Box>
             </Paper>
 
+            {/* Date Range Selector */}
+            <Paper elevation={0} sx={{ p: 2, mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                    <Typography variant="body2" fontWeight="bold" color="text.secondary" sx={{ mr: 1 }}>
+                        Date Range:
+                    </Typography>
+                    <ToggleButtonGroup
+                        value={preset}
+                        exclusive
+                        size="small"
+                        onChange={(_, v) => { if (v) setPreset(v); }}
+                    >
+                        {DATE_PRESETS.map(p => (
+                            <ToggleButton key={p.label} value={p.label} sx={{ px: 2, fontSize: '0.75rem' }}>
+                                {p.label}
+                            </ToggleButton>
+                        ))}
+                        <ToggleButton value="custom" sx={{ px: 2, fontSize: '0.75rem' }}>Custom</ToggleButton>
+                    </ToggleButtonGroup>
+
+                    {preset === 'custom' && (
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <DatePicker
+                                label="From"
+                                value={customStart}
+                                onChange={setCustomStart}
+                                slotProps={{ textField: { size: 'small', sx: { width: 140 } } }}
+                            />
+                            <Typography variant="body2">—</Typography>
+                            <DatePicker
+                                label="To"
+                                value={customEnd}
+                                onChange={setCustomEnd}
+                                minDate={customStart}
+                                slotProps={{ textField: { size: 'small', sx: { width: 140 } } }}
+                            />
+                        </Stack>
+                    )}
+
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
+                        {startDate} → {endDate}
+                    </Typography>
+                </Box>
+            </Paper>
+
             {/* KPI Row */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 {[
-                    { title: 'Total Patients',       value: generalStats?.totalPatients,       icon: <PeopleIcon />,              color: '#2D9596' },
-                    { title: 'Active Staff',          value: activeStaff,                       icon: <GroupIcon />,               color: '#1976d2' },
-                    { title: "Today's Appointments",  value: generalStats?.todaysAppointments,  icon: <CalendarTodayIcon />,        color: '#388e3c' },
-                    { title: 'Completion Rate',       value: generalStats ? `${generalStats.completionRate}%` : '—', icon: <CheckCircleOutlineIcon />, color: '#f57c00' },
+                    { title: 'Total Patients',        value: generalStats?.totalPatients,       icon: <PeopleIcon />,              color: '#2D9596' },
+                    { title: 'Active Staff',           value: activeStaff,                       icon: <GroupIcon />,               color: '#1976d2' },
+                    { title: 'Appointments in Range',  value: generalStats?.appointmentsInRange, icon: <CalendarTodayIcon />,        color: '#388e3c' },
+                    { title: 'New Patients in Range',  value: generalStats?.newPatientsInRange,  icon: <TrendingUpIcon />,           color: '#7b1fa2' },
+                    { title: 'Completion Rate',        value: generalStats ? `${generalStats.completionRate}%` : '—', icon: <CheckCircleOutlineIcon />, color: '#f57c00' },
                 ].map(({ title, value, icon, color }) => (
-                    <Grid item xs={12} sm={6} lg={3} key={title}>
+                    <Grid item xs={12} sm={6} lg={2.4} key={title}>
                         <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid', borderColor: 'divider', height: '100%' }}>
                             <Stack direction="row" spacing={2} alignItems="center">
                                 <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: `${color}15`, color, display: 'flex', alignItems: 'center' }}>{icon}</Box>

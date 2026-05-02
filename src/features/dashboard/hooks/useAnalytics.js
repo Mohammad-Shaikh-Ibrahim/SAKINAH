@@ -3,16 +3,17 @@ import { analyticsService } from '../api/AnalyticsService';
 
 export const ANALYTICS_KEYS = {
     all: ['analytics'],
-    stats: (userId) => [...ANALYTICS_KEYS.all, 'stats', userId],
+    stats: (userId, range) => [...ANALYTICS_KEYS.all, 'stats', userId, range],
     demographics: (userId) => [...ANALYTICS_KEYS.all, 'demographics', userId],
 };
 
-export const useGeneralStats = (userId) => {
+export const useGeneralStats = (userId, { startDate, endDate } = {}) => {
+    const range = { startDate, endDate };
     return useQuery({
-        queryKey: ANALYTICS_KEYS.stats(userId),
-        queryFn: () => analyticsService.getGeneralStats(userId),
+        queryKey: ANALYTICS_KEYS.stats(userId, range),
+        queryFn: () => analyticsService.getGeneralStats(userId, range),
         enabled: !!userId,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 5 * 60 * 1000,
     });
 };
 

@@ -10,9 +10,11 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
+import UploadIcon from '@mui/icons-material/Upload';
 import { Link as RouterLink } from 'react-router-dom';
 import { usePatients, useDeletePatient } from '../api/usePatients';
 import { PatientsTable } from '../components/PatientsTable';
+import { PatientBulkImportDialog } from '../components/PatientBulkImportDialog';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCurrentUser } from '../../auth/store/authSlice';
@@ -29,6 +31,7 @@ export const PatientsListPage = () => {
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [importOpen, setImportOpen] = useState(false);
     const limit = 10;
 
     const debouncedSearch = useDebounce(search, 350);
@@ -78,16 +81,26 @@ export const PatientsListPage = () => {
                     Patients
                 </Typography>
                 <PermissionGuard permission="patients.create">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<AddIcon />}
-                        component={RouterLink}
-                        to="/dashboard/patients/new"
-                        sx={{ height: 48, px: 3 }}
-                    >
-                        Add Patient
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<UploadIcon />}
+                            onClick={() => setImportOpen(true)}
+                            sx={{ height: 48 }}
+                        >
+                            Import CSV
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<AddIcon />}
+                            component={RouterLink}
+                            to="/dashboard/patients/new"
+                            sx={{ height: 48, px: 3 }}
+                        >
+                            Add Patient
+                        </Button>
+                    </Box>
                 </PermissionGuard>
             </Box>
 
@@ -134,6 +147,8 @@ export const PatientsListPage = () => {
                 onConfirm={handleDeleteConfirm}
                 onCancel={handleDeleteCancel}
             />
+
+            <PatientBulkImportDialog open={importOpen} onClose={() => setImportOpen(false)} />
         </>
     );
 };
