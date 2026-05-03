@@ -5,6 +5,8 @@ import {
     Typography,
     Paper,
     Button,
+    Menu,
+    MenuItem,
     Grid,
     Chip,
     Divider,
@@ -19,6 +21,8 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArticleIcon from '@mui/icons-material/Article';
+import { useSelector } from 'react-redux';
 import { usePatient, useDeletePatient } from '../api/usePatients';
 import { Helmet } from 'react-helmet-async';
 import { formatDate } from '../../../shared/utils/dateUtils';
@@ -28,6 +32,10 @@ import { PatientDocumentsTab } from '../components/PatientDocumentsTab';
 import { PatientVitalsTab } from '../components/PatientVitalsTab';
 import { PatientAccessManagement, PermissionGuard, usePermissions } from '../../users';
 import { PatientCommunicationTab } from '../components/PatientCommunicationTab';
+import { PatientClinicalNotesTab } from '../components/PatientClinicalNotesTab';
+import { HajjLetterDialog } from '../components/HajjLetterDialog';
+import { PatientLabResultsTab } from '../components/PatientLabResultsTab';
+import { selectCurrentUser } from '../../auth/store/authSlice';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -54,6 +62,9 @@ export const PatientDetailsPage = () => {
     const navigate = useNavigate();
     const [tabValue, setTabValue] = useState(0);
     const { isAdmin, isDoctor, hasPermission } = usePermissions();
+    const currentUser = useSelector(selectCurrentUser);
+    const [letterMenuAnchor, setLetterMenuAnchor] = useState(null);
+    const [letterDialogType, setLetterDialogType] = useState(null);
 
     const { data: patient, isLoading, isError } = usePatient(id);
     const deleteMutation = useDeletePatient();
@@ -101,6 +112,25 @@ export const PatientDetailsPage = () => {
                     sx={{ textTransform: 'capitalize', ml: 1 }}
                 />
                 <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+                    {(isAdmin || isDoctor) && (
+                        <>
+                            <Button
+                                variant="outlined"
+                                startIcon={<ArticleIcon />}
+                                onClick={e => setLetterMenuAnchor(e.currentTarget)}
+                            >
+                                Generate Letter
+                            </Button>
+                            <Menu
+                                anchorEl={letterMenuAnchor}
+                                open={Boolean(letterMenuAnchor)}
+                                onClose={() => setLetterMenuAnchor(null)}
+                            >
+                                <MenuItem onClick={() => { setLetterDialogType('hajj');  setLetterMenuAnchor(null); }}>Hajj Fitness Letter</MenuItem>
+                                <MenuItem onClick={() => { setLetterDialogType('umrah'); setLetterMenuAnchor(null); }}>Umrah Fitness Letter</MenuItem>
+                            </Menu>
+                        </>
+                    )}
                     <PermissionGuard permission="patients.update">
                         <Button
                             variant="outlined"
@@ -134,6 +164,8 @@ export const PatientDetailsPage = () => {
                         {hasPermission('patients.update.vitals') && <Tab label="Vitals" />}
                         {(hasPermission('documents.read') || hasPermission('documents.read.insurance')) && <Tab label="Documents" />}
                         {hasPermission('patients.read') && <Tab label="Communication" />}
+                        {hasPermission('patients.update') && <Tab label="Clinical Notes" />}
+                        {hasPermission('patients.read') && <Tab label="Lab Results" />}
                         {(isAdmin || isDoctor) && <Tab label="Access" />}
                     </Tabs>
                 </Box>
@@ -261,9 +293,23 @@ export const PatientDetailsPage = () => {
                     </TabPanel>
                 )}
 
+                {/* Clinical Notes Tab */}
+                {hasPermission('patients.update') && (
+                    <TabPanel value={tabValue} index={6}>
+                        <PatientClinicalNotesTab patientId={id} patient={patient} />
+                    </TabPanel>
+                )}
+
+                {/* Lab Results Tab */}
+                {hasPermission('patients.read') && (
+                    <TabPanel value={tabValue} index={7}>
+                        <PatientLabResultsTab patientId={id} patient={patient} />
+                    </TabPanel>
+                )}
+
                 {/* Access Tab (Admin/Doctor Only) */}
                 {(isAdmin || isDoctor) && (
-                    <TabPanel value={tabValue} index={6}>
+                    <TabPanel value={tabValue} index={8}>
                         <PatientAccessManagement
                             patientId={id}
                             patientName={`${patient.firstName} ${patient.lastName}`}
@@ -281,6 +327,16 @@ export const PatientDetailsPage = () => {
                 confirmText="Delete"
                 severity="error"
             />
+
+            {letterDialogType && (
+                <HajjLetterDialog
+                    open={!!letterDialogType}
+                    onClose={() => setLetterDialogType(null)}
+                    patient={patient}
+                    doctor={currentUser}
+                    letterType={letterDialogType}
+                />
+            )}
         </>
     );
 };

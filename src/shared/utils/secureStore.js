@@ -53,13 +53,18 @@ class SecureStore {
 
     /** @private */
     _obfuscate(text) {
-        return btoa(OBFUSCATION_SALT + text);
+        // Use TextEncoder to safely handle Unicode (Arabic, etc.) before base64
+        const bytes = new TextEncoder().encode(OBFUSCATION_SALT + text);
+        const binStr = Array.from(bytes, b => String.fromCharCode(b)).join('');
+        return btoa(binStr);
     }
 
     /** @private */
     _deobfuscate(encoded) {
         try {
-            const raw = atob(encoded);
+            const binStr = atob(encoded);
+            const bytes = Uint8Array.from(binStr, ch => ch.charCodeAt(0));
+            const raw = new TextDecoder().decode(bytes);
             if (!raw.startsWith(OBFUSCATION_SALT)) {
                 console.warn('[SecureStore] Integrity check failed — data may be tampered or from a different app version.');
                 return null;

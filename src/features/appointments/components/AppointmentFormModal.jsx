@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import {
     Dialog,
@@ -13,11 +13,13 @@ import {
     TextField,
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import MosqueIcon from '@mui/icons-material/Mosque';
 import { LoadingButton } from '@mui/lab';
 import { ControlledTextField } from '../../../shared/ui/ControlledTextField';
 import { FormGrid, FormFieldWrapper, ModalContentWrapper } from '../../../shared/ui/FormLayouts';
 import { usePatients } from '../../patients/api/usePatients';
 import { useCreateAppointment, useUpdateAppointment, useCheckAppointmentConflict } from '../hooks/useAppointments';
+import { checkPrayerConflict } from '../../../shared/utils/prayerTimes';
 import { format, addMinutes } from 'date-fns';
 
 export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, initialTime }) => {
@@ -52,6 +54,11 @@ export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, 
         start.setHours(h, m, 0, 0);
         return format(addMinutes(start, Number(watchDuration)), 'HH:mm');
     })();
+
+    const prayerConflict = useMemo(
+        () => checkPrayerConflict(watchDate, watchStartTime, watchDuration),
+        [watchDate, watchStartTime, watchDuration]
+    );
 
     const { data: conflictData } = useCheckAppointmentConflict({
         date: watchDate,
@@ -219,6 +226,14 @@ export const AppointmentFormModal = ({ open, onClose, appointment, initialDate, 
                 <Box sx={{ px: 3, pt: 1 }}>
                     <Alert severity="warning" icon={<WarningAmberIcon fontSize="inherit" />}>
                         This time slot conflicts with an existing appointment. You can still book, but please verify.
+                    </Alert>
+                </Box>
+            )}
+
+            {prayerConflict.conflicting && (
+                <Box sx={{ px: 3, pt: 1 }}>
+                    <Alert severity="info" icon={<MosqueIcon fontSize="inherit" />}>
+                        This appointment overlaps with <strong>{prayerConflict.prayers.join(', ')}</strong> prayer time. Consider adjusting the schedule to accommodate staff and patient observance.
                     </Alert>
                 </Box>
             )}

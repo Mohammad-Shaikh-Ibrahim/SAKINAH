@@ -15,10 +15,13 @@ const PatientCreateEditPage = lazy(() => import('../../features/patients/pages/P
 const PatientDetailsPage = lazy(() => import('../../features/patients/pages/PatientDetailsPage').then(module => ({ default: module.PatientDetailsPage })));
 const AppointmentsPage = lazy(() => import('../../features/appointments/pages/AppointmentsPage').then(module => ({ default: module.AppointmentsPage })));
 const AvailabilitySettingsPage = lazy(() => import('../../features/appointments/pages/AvailabilitySettingsPage').then(module => ({ default: module.AvailabilitySettingsPage })));
+const WaitingRoomPage = lazy(() => import('../../features/appointments/pages/WaitingRoomPage').then(module => ({ default: module.WaitingRoomPage })));
 const DashboardHomePage = lazy(() => import('../../features/dashboard/pages/DashboardHomePage').then(module => ({ default: module.DashboardHomePage })));
+const FinancialDashboard = lazy(() => import('../../features/dashboard/pages/FinancialDashboard').then(module => ({ default: module.FinancialDashboard })));
 const PrescriptionCreateEditPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionCreateEditPage').then(module => ({ default: module.PrescriptionCreateEditPage })));
 const PrescriptionsListPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionsListPage').then(module => ({ default: module.PrescriptionsListPage })));
 const PrescriptionDetailsPage = lazy(() => import('../../features/prescriptions/pages/PrescriptionDetailsPage').then(module => ({ default: module.PrescriptionDetailsPage })));
+const RefillQueuePage = lazy(() => import('../../features/prescriptions/pages/RefillQueuePage').then(module => ({ default: module.RefillQueuePage })));
 
 // Users & Admin Pages
 const UserManagementPage = lazy(() => import('../../features/users/pages/UserManagementPage'));
@@ -179,6 +182,16 @@ export const router = createBrowserRouter([
                         ),
                     },
                     {
+                        path: 'refill-queue',
+                        element: (
+                            <ProtectedRoute permission="prescriptions.update">
+                                <Suspense fallback={<Loading />}>
+                                    <RefillQueuePage />
+                                </Suspense>
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
                         path: 'appointments',
                         element: (
                             <ProtectedRoute permission="appointments.read">
@@ -189,11 +202,32 @@ export const router = createBrowserRouter([
                         ),
                     },
                     {
+                        path: 'waiting-room',
+                        element: (
+                            <ProtectedRoute permission="appointments.read">
+                                <Suspense fallback={<Loading />}>
+                                    <WaitingRoomPage />
+                                </Suspense>
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
                         path: 'appointments/settings',
                         element: (
                             <ProtectedRoute permission="appointments.update">
                                 <Suspense fallback={<Loading />}>
                                     <AvailabilitySettingsPage />
+                                </Suspense>
+                            </ProtectedRoute>
+                        ),
+                    },
+                    // Financial Dashboard (Admin only)
+                    {
+                        path: 'financial',
+                        element: (
+                            <ProtectedRoute permission="audit.read">
+                                <Suspense fallback={<Loading />}>
+                                    <FinancialDashboard />
                                 </Suspense>
                             </ProtectedRoute>
                         ),

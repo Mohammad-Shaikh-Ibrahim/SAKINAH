@@ -34,7 +34,10 @@ export const DashboardLayout = () => {
         const items = [{ label: 'Dashboard', path: '/dashboard' }];
         if (hasPermission('patients.read'))       items.push({ label: 'Patients',       path: '/dashboard/patients' });
         if (hasPermission('appointments.read'))   items.push({ label: 'Appointments',   path: '/dashboard/appointments' });
+        if (hasPermission('appointments.read'))   items.push({ label: 'Waiting Room',   path: '/dashboard/waiting-room' });
         if (hasPermission('prescriptions.read'))  items.push({ label: 'Prescriptions',  path: '/dashboard/prescriptions' });
+        if (hasPermission('prescriptions.update')) items.push({ label: 'Refill Queue',   path: '/dashboard/refill-queue' });
+        if (hasPermission('audit.read'))           items.push({ label: 'Financial',      path: '/dashboard/financial' });
         return items;
     }, [hasPermission]);
 

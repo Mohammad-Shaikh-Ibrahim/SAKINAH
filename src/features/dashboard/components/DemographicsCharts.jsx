@@ -27,7 +27,7 @@ export const DemographicsCharts = ({ data }) => {
                 <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider', height: '100%' }}>
                     <Typography variant="h6" fontWeight="bold" gutterBottom>Gender Distribution</Typography>
                     {hasGenderData ? (
-                        <Box sx={{ height: 300, width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <Box sx={{ width: '100%' }}>
                             <PieChart
                                 series={[{
                                     data: data.gender.map((item, id) => ({ id, ...item })),
@@ -35,9 +35,13 @@ export const DemographicsCharts = ({ data }) => {
                                     outerRadius: 100,
                                     paddingAngle: 5,
                                     cornerRadius: 5,
+                                    cx: 120,
+                                    cy: 120,
                                 }]}
                                 colors={genderPalette}
-                                height={250}
+                                width={280}
+                                height={260}
+                                margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
                             />
                         </Box>
                     ) : (

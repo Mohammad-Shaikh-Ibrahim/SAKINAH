@@ -9,6 +9,7 @@ import { logger } from '../../../shared/utils/logger';
 const STORAGE_KEY_MEDICATIONS = 'sakinah_medication_db';
 const STORAGE_KEY_INTERACTIONS = 'sakinah_drug_interactions';
 const STORAGE_KEY_ALLERGIES = 'sakinah_patient_allergies';
+const STORAGE_KEY_REFILL_REQUESTS = 'sakinah_refill_requests';
 
 class LocalStoragePrescriptionsRepository extends BaseRepository {
     constructor() {
@@ -135,6 +136,80 @@ class LocalStoragePrescriptionsRepository extends BaseRepository {
 
         await this.update(prescriptionId, { medications: prescription.medications });
         return prescription.medications[mIndex];
+    }
+
+    // ─── Refill Requests ─────────────────────────────────────────────────────────
+
+    _getRefillRequests() { return secureStore.getItem(STORAGE_KEY_REFILL_REQUESTS) || []; }
+    _saveRefillRequests(requests) { secureStore.setItem(STORAGE_KEY_REFILL_REQUESTS, requests); }
+
+    async createRefillRequest({ prescriptionId, medicationId, patientId, patientName, medicationName, requestedBy }) {
+        const requests = this._getRefillRequests();
+        const existing = requests.find(
+            r => r.prescriptionId === prescriptionId && r.medicationId === medicationId && r.status === 'pending'
+        );
+        if (existing) throw new Error('A refill request for this medication is already pending.');
+
+        const newRequest = {
+            id: `refill-${uuidv4().slice(0, 8)}`,
+            prescriptionId,
+            medicationId,
+            patientId,
+            patientName: patientName ?? '',
+            medicationName: medicationName ?? '',
+            requestedBy: requestedBy ?? null,
+            requestedAt: new Date().toISOString(),
+            status: 'pending',
+            reviewedBy: null,
+            reviewedAt: null,
+            reviewNote: '',
+        };
+        requests.push(newRequest);
+        this._saveRefillRequests(requests);
+        return newRequest;
+    }
+
+    async getRefillRequests({ status } = {}) {
+        const requests = this._getRefillRequests();
+        return status
+            ? requests.filter(r => r.status === status).sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt))
+            : [...requests].sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+    }
+
+    async approveRefillRequest(requestId, reviewedBy) {
+        const requests = this._getRefillRequests();
+        const idx = requests.findIndex(r => r.id === requestId);
+        if (idx === -1) throw new Error('Refill request not found');
+        if (requests[idx].status !== 'pending') throw new Error('Request is no longer pending');
+
+        // Perform the actual refill on the prescription
+        await this.refillMedication(requests[idx].prescriptionId, requests[idx].medicationId);
+
+        requests[idx] = {
+            ...requests[idx],
+            status: 'approved',
+            reviewedBy: reviewedBy ?? null,
+            reviewedAt: new Date().toISOString(),
+        };
+        this._saveRefillRequests(requests);
+        return requests[idx];
+    }
+
+    async denyRefillRequest(requestId, reviewedBy, reviewNote) {
+        const requests = this._getRefillRequests();
+        const idx = requests.findIndex(r => r.id === requestId);
+        if (idx === -1) throw new Error('Refill request not found');
+        if (requests[idx].status !== 'pending') throw new Error('Request is no longer pending');
+
+        requests[idx] = {
+            ...requests[idx],
+            status: 'denied',
+            reviewedBy: reviewedBy ?? null,
+            reviewedAt: new Date().toISOString(),
+            reviewNote: reviewNote ?? '',
+        };
+        this._saveRefillRequests(requests);
+        return requests[idx];
     }
 
     async searchMedicationDatabase(query) {

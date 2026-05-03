@@ -18,15 +18,20 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
-import { useActiveMedications, useDiscontinueMedication, useRefillMedication } from '../hooks/usePrescriptions';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import { useSelector } from 'react-redux';
+import { useActiveMedications, useDiscontinueMedication, useRefillMedication, useCreateRefillRequest } from '../hooks/usePrescriptions';
 import { ConfirmModal } from '../../../shared/ui/ConfirmModal';
+import { selectCurrentUser } from '../../auth/store/authSlice';
 
-export const ActiveMedicationsList = ({ patientId }) => {
+export const ActiveMedicationsList = ({ patientId, patientName }) => {
+    const currentUser = useSelector(selectCurrentUser);
     const { data: activeMeds = [], isLoading } = useActiveMedications(patientId);
 
     // Actions
     const discontinueMutation = useDiscontinueMedication();
     const refillMutation = useRefillMedication();
+    const refillRequestMutation = useCreateRefillRequest();
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedMed, setSelectedMed] = useState(null);
@@ -53,6 +58,23 @@ export const ActiveMedicationsList = ({ patientId }) => {
         } catch (error) {
             console.error('Refills failed', error);
             alert('Cannot refill: ' + error.message);
+        }
+    };
+
+    const handleRequestRefill = async () => {
+        if (!selectedMed) return;
+        try {
+            await refillRequestMutation.mutateAsync({
+                prescriptionId: selectedMed.prescriptionId,
+                medicationId: selectedMed.id,
+                patientId,
+                patientName: patientName ?? patientId,
+                medicationName: selectedMed.medicationName,
+                requestedBy: currentUser?.fullName ?? null,
+            });
+            handleMenuClose();
+        } catch (error) {
+            alert(error.message ?? 'Failed to submit refill request');
         }
     };
 
@@ -142,7 +164,10 @@ export const ActiveMedicationsList = ({ patientId }) => {
                 onClose={handleMenuClose}
             >
                 <MenuItem onClick={handleRefill} disabled={selectedMed && selectedMed.refillsUsed >= selectedMed.refills}>
-                    <RefreshIcon fontSize="small" sx={{ mr: 1 }} /> Refill
+                    <RefreshIcon fontSize="small" sx={{ mr: 1 }} /> Refill Now
+                </MenuItem>
+                <MenuItem onClick={handleRequestRefill} disabled={!!(selectedMed && selectedMed.refillsUsed >= selectedMed.refills)}>
+                    <HourglassEmptyIcon fontSize="small" sx={{ mr: 1 }} /> Request Refill
                 </MenuItem>
                 <MenuItem onClick={handleDiscontinueClick} sx={{ color: 'error.main' }}>
                     <StopCircleIcon fontSize="small" sx={{ mr: 1 }} /> Discontinue

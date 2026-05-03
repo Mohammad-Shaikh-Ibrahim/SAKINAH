@@ -33,6 +33,7 @@ const VITALS_NORMAL = {
 function hasAbnormalVitals(vitals = []) {
     if (vitals.length === 0) return false;
     const latest = vitals[0];
+    if (!latest) return false;
     if (latest.hr   && (latest.hr   < VITALS_NORMAL.hr.min   || latest.hr   > VITALS_NORMAL.hr.max))   return true;
     if (latest.temp && (latest.temp < VITALS_NORMAL.temp.min || latest.temp > VITALS_NORMAL.temp.max)) return true;
     if (latest.spo2 && (latest.spo2 < VITALS_NORMAL.spo2.min))                                         return true;
