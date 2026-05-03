@@ -27,6 +27,7 @@ import { PrescriptionsListPage } from '../../prescriptions';
 import { PatientDocumentsTab } from '../components/PatientDocumentsTab';
 import { PatientVitalsTab } from '../components/PatientVitalsTab';
 import { PatientAccessManagement, PermissionGuard, usePermissions } from '../../users';
+import { PatientCommunicationTab } from '../components/PatientCommunicationTab';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -132,6 +133,7 @@ export const PatientDetailsPage = () => {
                         {hasPermission('prescriptions.read') && <Tab label="Prescriptions" />}
                         {hasPermission('patients.update.vitals') && <Tab label="Vitals" />}
                         {(hasPermission('documents.read') || hasPermission('documents.read.insurance')) && <Tab label="Documents" />}
+                        {hasPermission('patients.read') && <Tab label="Communication" />}
                         {(isAdmin || isDoctor) && <Tab label="Access" />}
                     </Tabs>
                 </Box>
@@ -252,9 +254,16 @@ export const PatientDetailsPage = () => {
                     </TabPanel>
                 )}
 
+                {/* Communication Tab */}
+                {hasPermission('patients.read') && (
+                    <TabPanel value={tabValue} index={5}>
+                        <PatientCommunicationTab patientId={id} patient={patient} />
+                    </TabPanel>
+                )}
+
                 {/* Access Tab (Admin/Doctor Only) */}
                 {(isAdmin || isDoctor) && (
-                    <TabPanel value={tabValue} index={5}>
+                    <TabPanel value={tabValue} index={6}>
                         <PatientAccessManagement
                             patientId={id}
                             patientName={`${patient.firstName} ${patient.lastName}`}

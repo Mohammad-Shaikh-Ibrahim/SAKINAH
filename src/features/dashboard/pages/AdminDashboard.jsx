@@ -20,6 +20,7 @@ import { useAuditLogs } from '../../users/hooks/useAuditLogs';
 import { useUsers } from '../../users/hooks/useUsers';
 import { DemographicsCharts } from '../components/DemographicsCharts';
 import { PatientRiskPanel } from '../components/PatientRiskPanel';
+import { ErrorBoundary } from '../../../shared/ui/ErrorBoundary';
 
 const ACTION_COLORS = {
     create: 'success',
@@ -159,34 +160,36 @@ export const AdminDashboard = ({ user }) => {
             <Grid container spacing={3}>
                 {/* Recent Audit Activity */}
                 <Grid item xs={12} md={5}>
-                    <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid', borderColor: 'divider', height: '100%' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="h6" fontWeight="bold">Recent Activity</Typography>
-                            <Button size="small" component={RouterLink} to="/dashboard/audit-logs">View All</Button>
-                        </Box>
-                        {auditLoading ? (
-                            [...Array(5)].map((_, i) => <Skeleton key={i} sx={{ mb: 1 }} height={40} />)
-                        ) : recentLogs.length === 0 ? (
-                            <Typography variant="body2" color="text.secondary">No recent activity.</Typography>
-                        ) : (
-                            <List dense disablePadding>
-                                {recentLogs.map(log => (
-                                    <React.Fragment key={log.id}>
-                                        <ListItem disablePadding sx={{ py: 0.5 }}>
-                                            <ListItemIcon sx={{ minWidth: 32 }}>
-                                                <Chip label={log.action} size="small" color={ACTION_COLORS[log.action] ?? 'default'} sx={{ fontSize: '0.6rem', height: 20 }} />
-                                            </ListItemIcon>
-                                            <ListItemText
-                                                primary={<Typography variant="body2" noWrap>{log.resourceName || log.details}</Typography>}
-                                                secondary={<Typography variant="caption" color="text.secondary">{log.userName} · {log.timestamp ? format(new Date(log.timestamp), 'MMM d, HH:mm') : ''}</Typography>}
-                                            />
-                                        </ListItem>
-                                        <Divider component="li" />
-                                    </React.Fragment>
-                                ))}
-                            </List>
-                        )}
-                    </Paper>
+                    <ErrorBoundary inline label="Recent Activity">
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid', borderColor: 'divider', height: '100%' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6" fontWeight="bold">Recent Activity</Typography>
+                                <Button size="small" component={RouterLink} to="/dashboard/audit-logs">View All</Button>
+                            </Box>
+                            {auditLoading ? (
+                                [...Array(5)].map((_, i) => <Skeleton key={i} sx={{ mb: 1 }} height={40} />)
+                            ) : recentLogs.length === 0 ? (
+                                <Typography variant="body2" color="text.secondary">No recent activity.</Typography>
+                            ) : (
+                                <List dense disablePadding>
+                                    {recentLogs.map(log => (
+                                        <React.Fragment key={log.id}>
+                                            <ListItem disablePadding sx={{ py: 0.5 }}>
+                                                <ListItemIcon sx={{ minWidth: 32 }}>
+                                                    <Chip label={log.action ?? '—'} size="small" color={ACTION_COLORS[log.action] ?? 'default'} sx={{ fontSize: '0.6rem', height: 20 }} />
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={<Typography variant="body2" noWrap>{log.resourceName || log.details || '—'}</Typography>}
+                                                    secondary={<Typography variant="caption" color="text.secondary">{log.userName} · {log.timestamp ? format(new Date(log.timestamp), 'MMM d, HH:mm') : ''}</Typography>}
+                                                />
+                                            </ListItem>
+                                            <Divider component="li" />
+                                        </React.Fragment>
+                                    ))}
+                                </List>
+                            )}
+                        </Paper>
+                    </ErrorBoundary>
                 </Grid>
 
                 {/* Demographics & Stats */}
@@ -196,14 +199,18 @@ export const AdminDashboard = ({ user }) => {
                         {demoLoading ? (
                             <Skeleton variant="rectangular" height={280} sx={{ borderRadius: 2 }} />
                         ) : (
-                            <DemographicsCharts data={demographics} />
+                            <ErrorBoundary inline label="Demographics Charts">
+                                <DemographicsCharts data={demographics} />
+                            </ErrorBoundary>
                         )}
                     </Paper>
                 </Grid>
 
                 {/* Patient Risk Watch */}
                 <Grid item xs={12}>
-                    <PatientRiskPanel />
+                    <ErrorBoundary inline label="Patient Risk Watch">
+                        <PatientRiskPanel />
+                    </ErrorBoundary>
                 </Grid>
             </Grid>
         </>

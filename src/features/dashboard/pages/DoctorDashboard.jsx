@@ -13,7 +13,8 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import MedicationIcon from '@mui/icons-material/Medication';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { format } from 'date-fns';
+import { format, startOfWeek, endOfWeek, addDays, eachDayOfInterval } from 'date-fns';
+import { BarChart } from '@mui/x-charts/BarChart';
 import { useAppointments } from '../../appointments/hooks/useAppointments';
 import { usePatients } from '../../patients/api/usePatients';
 import { useAllPrescriptions } from '../../prescriptions/hooks/usePrescriptions';
@@ -29,8 +30,11 @@ function getGreeting() {
 
 export const DoctorDashboard = ({ user }) => {
     const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+    const weekStart = useMemo(() => format(startOfWeek(new Date(), { weekStartsOn: 0 }), 'yyyy-MM-dd'), []);
+    const weekEnd   = useMemo(() => format(endOfWeek(new Date(), { weekStartsOn: 0 }), 'yyyy-MM-dd'), []);
 
     const { data: todayApts = [],   isLoading: aptsLoading  } = useAppointments(today, today);
+    const { data: weekApts  = [],   isLoading: weekLoading  } = useAppointments(weekStart, weekEnd);
     const { data: patientsData,      isLoading: patientsLoading } = usePatients();
     const { data: allRx = [],        isLoading: rxLoading    } = useAllPrescriptions();
 
@@ -53,6 +57,23 @@ export const DoctorDashboard = ({ user }) => {
     );
 
     const totalPatients = patientsData?.total ?? '—';
+
+    // Weekly workload chart data
+    const weekDays = useMemo(() => {
+        const start = startOfWeek(new Date(), { weekStartsOn: 0 });
+        return eachDayOfInterval({ start, end: addDays(start, 6) });
+    }, []);
+
+    const weekChartData = useMemo(() => {
+        return weekDays.map(day => {
+            const dayStr = format(day, 'yyyy-MM-dd');
+            const count = weekApts.filter(a => a.appointmentDate === dayStr && a.status !== 'cancelled').length;
+            return { label: format(day, 'EEE'), count };
+        });
+    }, [weekApts, weekDays]);
+
+    const weekTotal = useMemo(() => weekApts.filter(a => a.status !== 'cancelled').length, [weekApts]);
+    const weekCompleted = useMemo(() => weekApts.filter(a => a.status === 'completed').length, [weekApts]);
 
     return (
         <>
@@ -180,6 +201,27 @@ export const DoctorDashboard = ({ user }) => {
                     </Paper>
                 </Grid>
             </Grid>
+
+            {/* Weekly Workload */}
+            <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid', borderColor: 'divider', mt: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="h6" fontWeight="bold">This Week's Workload</Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Typography variant="caption" color="text.secondary">{weekCompleted}/{weekTotal} completed</Typography>
+                    </Box>
+                </Box>
+                {weekLoading ? (
+                    <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 2 }} />
+                ) : (
+                    <BarChart
+                        height={160}
+                        xAxis={[{ data: weekChartData.map(d => d.label), scaleType: 'band' }]}
+                        series={[{ data: weekChartData.map(d => d.count), color: '#2D9596', label: 'Appointments' }]}
+                        margin={{ top: 10, bottom: 30, left: 30, right: 10 }}
+                        slotProps={{ legend: { hidden: true } }}
+                    />
+                )}
+            </Paper>
         </>
     );
 };

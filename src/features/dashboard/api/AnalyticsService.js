@@ -1,11 +1,22 @@
 import { patientsRepository } from '../../patients/api/LocalStoragePatientsRepository';
 import { appointmentsRepository } from '../../appointments/api/LocalStorageAppointmentsRepository';
+import { usersRepository } from '../../users/api/LocalStorageUsersRepository';
 import { subDays, format, isAfter } from 'date-fns';
 
 // Maximum records fetched for analytics aggregations — tune as data grows
 const ANALYTICS_FETCH_LIMIT = 1000;
 
 class AnalyticsService {
+    async _isAdmin(userId) {
+        try {
+            const users = usersRepository._getUsers();
+            const user = users.find(u => u.id === userId);
+            return user?.role === 'admin';
+        } catch {
+            return false;
+        }
+    }
+
     /**
      * Get general statistics for the dashboard.
      * @param {string} userId
@@ -13,16 +24,18 @@ class AnalyticsService {
      *   When omitted, defaults to last 30 days for appointments and last 7 days for new patients.
      */
     async getGeneralStats(userId, { startDate, endDate } = {}) {
-        const { data: patients } = await patientsRepository.getAll({ userId, limit: ANALYTICS_FETCH_LIMIT });
+        // Admin sees all patients; other roles see only their own
+        const isAdmin = await this._isAdmin(userId);
+        const { data: patients } = isAdmin
+            ? await patientsRepository.getAll({ limit: ANALYTICS_FETCH_LIMIT })
+            : await patientsRepository.getAll({ userId, limit: ANALYTICS_FETCH_LIMIT });
 
         const rangeStart = startDate ?? format(subDays(new Date(), 30), 'yyyy-MM-dd');
         const rangeEnd   = endDate   ?? format(new Date(), 'yyyy-MM-dd');
 
-        const appointments = await appointmentsRepository.getAppointmentsByDateRange(
-            rangeStart,
-            rangeEnd,
-            userId
-        );
+        const appointments = isAdmin
+            ? await appointmentsRepository.getAllAppointmentsByDateRange(rangeStart, rangeEnd)
+            : await appointmentsRepository.getAppointmentsByDateRange(rangeStart, rangeEnd, userId);
 
         const totalPatients = patients.length;
 
@@ -54,7 +67,10 @@ class AnalyticsService {
      * Get patient demographics breakdown
      */
     async getPatientDemographics(userId) {
-        const { data: patients } = await patientsRepository.getAll({ userId, limit: ANALYTICS_FETCH_LIMIT });
+        const isAdmin = await this._isAdmin(userId);
+        const { data: patients } = isAdmin
+            ? await patientsRepository.getAll({ limit: ANALYTICS_FETCH_LIMIT })
+            : await patientsRepository.getAll({ userId, limit: ANALYTICS_FETCH_LIMIT });
 
         const genderData = patients.reduce((acc, p) => {
             const gender = p.gender || 'other';

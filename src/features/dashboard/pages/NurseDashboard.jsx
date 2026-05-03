@@ -11,18 +11,22 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import PeopleIcon from '@mui/icons-material/People';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { format } from 'date-fns';
+import { format, startOfWeek, endOfWeek, addDays, eachDayOfInterval } from 'date-fns';
+import { BarChart } from '@mui/x-charts/BarChart';
 import { useAllAppointments } from '../../appointments/hooks/useAppointments';
 
 const STATUS_COLOR = { scheduled: 'warning', completed: 'success', cancelled: 'error' };
 
 export const NurseDashboard = ({ user }) => {
-    const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+    const today     = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+    const weekStart = useMemo(() => format(startOfWeek(new Date(), { weekStartsOn: 0 }), 'yyyy-MM-dd'), []);
+    const weekEnd   = useMemo(() => format(endOfWeek(new Date(), { weekStartsOn: 0 }), 'yyyy-MM-dd'), []);
 
     const { data: todayApts = [], isLoading: aptsLoading } = useAllAppointments(today, today);
+    const { data: weekApts  = [], isLoading: weekLoading  } = useAllAppointments(weekStart, weekEnd);
 
     const activeApts = useMemo(() =>
-        [...todayApts].filter(a => a.status !== 'cancelled').sort((a, b) => a.startTime.localeCompare(b.startTime)),
+        [...todayApts].filter(a => a.status !== 'cancelled').sort((a, b) => (a.startTime ?? '').localeCompare(b.startTime ?? '')),
         [todayApts]
     );
 
@@ -30,6 +34,22 @@ export const NurseDashboard = ({ user }) => {
     const waiting     = useMemo(() => todayApts.filter(a => a.status === 'scheduled').length, [todayApts]);
     const cancelled   = useMemo(() => todayApts.filter(a => a.status === 'cancelled').length, [todayApts]);
     const totalToday  = todayApts.length;
+
+    const weekDays = useMemo(() => {
+        const start = startOfWeek(new Date(), { weekStartsOn: 0 });
+        return eachDayOfInterval({ start, end: addDays(start, 6) });
+    }, []);
+
+    const weekChartData = useMemo(() => weekDays.map(day => {
+        const dayStr = format(day, 'yyyy-MM-dd');
+        return {
+            label: format(day, 'EEE'),
+            count: weekApts.filter(a => a.appointmentDate === dayStr && a.status !== 'cancelled').length,
+        };
+    }), [weekApts, weekDays]);
+
+    const weekTotal     = useMemo(() => weekApts.filter(a => a.status !== 'cancelled').length, [weekApts]);
+    const weekCompleted = useMemo(() => weekApts.filter(a => a.status === 'completed').length, [weekApts]);
 
     const kpis = [
         { title: "Today's Appointments", value: aptsLoading ? null : totalToday,  icon: <CalendarTodayIcon />,       color: '#2D9596' },
@@ -104,7 +124,7 @@ export const NurseDashboard = ({ user }) => {
                         </TableHead>
                         <TableBody>
                             {[...todayApts]
-                                .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                                .sort((a, b) => (a.startTime ?? '').localeCompare(b.startTime ?? ''))
                                 .map(apt => (
                                     <TableRow key={apt.id} hover>
                                         <TableCell>
@@ -137,6 +157,25 @@ export const NurseDashboard = ({ user }) => {
                                 ))}
                         </TableBody>
                     </Table>
+                )}
+            </Paper>
+
+            {/* Weekly Workload */}
+            <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid', borderColor: 'divider', mt: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="h6" fontWeight="bold">This Week's Workload</Typography>
+                    <Typography variant="caption" color="text.secondary">{weekCompleted}/{weekTotal} completed</Typography>
+                </Box>
+                {weekLoading ? (
+                    <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 2 }} />
+                ) : (
+                    <BarChart
+                        height={160}
+                        xAxis={[{ data: weekChartData.map(d => d.label), scaleType: 'band' }]}
+                        series={[{ data: weekChartData.map(d => d.count), color: '#388e3c', label: 'Appointments' }]}
+                        margin={{ top: 10, bottom: 30, left: 30, right: 10 }}
+                        slotProps={{ legend: { hidden: true } }}
+                    />
                 )}
             </Paper>
         </>

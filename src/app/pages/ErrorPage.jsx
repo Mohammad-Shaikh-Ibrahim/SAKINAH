@@ -29,11 +29,13 @@ export const ErrorPage = ({ forceCode }) => {
     // Get config or default
     const config = errorConfig[activeCode] || errorConfig['default'];
 
+    const errorDetail = routeError?.message || routeError?.toString?.() || '';
+
     return (
         <ErrorLayout
             code={activeCode === 'default' ? 'Ooops' : config.code}
             title={config.title}
-            message={config.message}
+            message={errorDetail || config.message}
             icon={config.icon}
             isServer={config.isServer}
         />

@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Box, CircularProgress } from '@mui/material';
 import { selectCurrentUser } from '../../auth/store/authSlice';
+import { ErrorBoundary } from '../../../shared/ui/ErrorBoundary';
 
 const AdminDashboard        = lazy(() => import('./AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const DoctorDashboard       = lazy(() => import('./DoctorDashboard').then(m => ({ default: m.DoctorDashboard })));
@@ -31,8 +32,10 @@ export const DashboardHomePage = () => {
     }
 
     return (
-        <Suspense fallback={<Loading />}>
-            <RoleDashboard user={user} />
-        </Suspense>
+        <ErrorBoundary>
+            <Suspense fallback={<Loading />}>
+                <RoleDashboard user={user} />
+            </Suspense>
+        </ErrorBoundary>
     );
 };

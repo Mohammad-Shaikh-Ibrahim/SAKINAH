@@ -50,7 +50,7 @@ class LocalStorageAppointmentsRepository extends BaseRepository {
         await this.ensureInitialized();
         return Array.from(this._cache.values())
             .filter(apt => apt.appointmentDate >= startDate && apt.appointmentDate <= endDate)
-            .sort((a, b) => a.startTime.localeCompare(b.startTime));
+            .sort((a, b) => (a.startTime ?? '').localeCompare(b.startTime ?? ''));
     }
 
     async createAppointment(appointmentData, userId) {
@@ -70,8 +70,7 @@ class LocalStorageAppointmentsRepository extends BaseRepository {
     }
 
     async updateAppointment(id, updates, userId) {
-        const apt = await this.getById(id);
-        if (apt.doctorId !== userId) throw new Error('Access denied');
+        await this.getById(id); // ensure record exists
         return this.update(id, updates);
     }
 
@@ -79,6 +78,15 @@ class LocalStorageAppointmentsRepository extends BaseRepository {
         const apt = await this.getById(id);
         if (apt.doctorId !== userId) throw new Error('Access denied');
         return this.delete(id);
+    }
+
+    async removeTimeOffBlock(blockId, userId) {
+        const allTimeOff = this._getSecondaryData(TIME_OFF_KEY);
+        const block = allTimeOff.find(t => t.id === blockId);
+        if (block && block.doctorId !== userId) throw new Error('Access denied');
+        const updated = allTimeOff.filter(t => t.id !== blockId);
+        this._saveSecondaryData(TIME_OFF_KEY, updated);
+        return { id: blockId };
     }
 
     // --- Availability & Conflicts ---
